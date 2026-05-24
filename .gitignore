@@ -40,6 +40,11 @@ Thumbs.db
 #original repo
 data/kvasir-capsule/
 
+# Datafiles are too large to track
 /data/
 
+# Temporary excluded
 docs/
+
+# Testing modules
+test/
