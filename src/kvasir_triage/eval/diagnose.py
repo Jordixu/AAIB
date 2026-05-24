@@ -46,7 +46,7 @@ def build_operating_envelope(
             "applicable_subclasses": [
                 c for c in [
                     "Angiectasia", "Blood - fresh", "Erosion", "Erythema",
-                    "Foreign body", "Lymphangiectasia", "Polyp", "Ulcer",
+                    "Foreign body", "Lymphangiectasia", "Ulcer",
                 ]
             ],
             "excluded_with_rationale": {
