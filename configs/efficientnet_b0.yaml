@@ -1,0 +1,7 @@
+# Config 2: EfficientNet-B0 pretrained
+model: efficientnet_b0
+pretrained: true
+dropout: 0.2
+
+batch_size: 32
+lr: 3.0e-4
