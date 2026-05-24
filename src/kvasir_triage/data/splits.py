@@ -113,7 +113,6 @@ def build_split_index(
     fold=2 is the held-out test set (assigned when test_video_ids is provided).
 
     image_df must have columns: stem, subclass.
-    Images not in official splits that are Polyps use polyp_fold_override.
     Any remaining unassigned images are dropped with a warning.
     """
     df = image_df.copy()
