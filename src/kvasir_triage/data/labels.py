@@ -28,7 +28,6 @@ CANONICAL_LABELS = [
     "Ileocecal valve",
     "Lymphangiectasia",
     "Normal clean mucosa",
-    "Polyp",
     "Pylorus",
     "Reduced mucosal view",
     "Ulcer",
