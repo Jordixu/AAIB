@@ -1,0 +1,134 @@
+{
+  "class_counts_by_fold": {
+    "0": {
+      "Normal clean mucosa": 10556,
+      "Ileocecal valve": 2408,
+      "Reduced mucosal view": 762,
+      "Angiectasia": 760,
+      "Pylorus": 578,
+      "Ulcer": 272,
+      "Lymphangiectasia": 224,
+      "Foreign body": 203,
+      "Erosion": 81,
+      "Erythema": 36,
+      "Blood - fresh": 22
+    },
+    "1": {
+      "Normal clean mucosa": 14755,
+      "Ileocecal valve": 902,
+      "Reduced mucosal view": 1974,
+      "Angiectasia": 67,
+      "Pylorus": 519,
+      "Ulcer": 582,
+      "Lymphangiectasia": 368,
+      "Foreign body": 0,
+      "Erosion": 377,
+      "Erythema": 0,
+      "Blood - fresh": 424
+    },
+    "2": {
+      "Normal clean mucosa": 9027,
+      "Ileocecal valve": 879,
+      "Reduced mucosal view": 170,
+      "Angiectasia": 39,
+      "Pylorus": 432,
+      "Ulcer": 0,
+      "Lymphangiectasia": 0,
+      "Foreign body": 573,
+      "Erosion": 48,
+      "Erythema": 123,
+      "Blood - fresh": 0
+    }
+  },
+  "binary_counts_by_fold": {
+    "0": {
+      "Normal": 14304,
+      "Suspicious": 1598
+    },
+    "1": {
+      "Normal": 18150,
+      "Suspicious": 1818
+    },
+    "2": {
+      "Normal": 10508,
+      "Suspicious": 783
+    }
+  },
+  "intra_video_duplication": {
+    "n_videos": 43,
+    "n_frames": 47161,
+    "median_frames_per_video": 1002.0,
+    "p90_frames_per_video": 2012.6000000000001,
+    "p99_frames_per_video": 2295.2999999999997,
+    "max_frames_per_video": 2394,
+    "top10_videos": {
+      "5e59c7fdb16c4228": 2394,
+      "64440803f87b4843": 2159,
+      "dac1e27f7e4d4ef5": 2152,
+      "fb86bc87d3874cd7": 2085,
+      "8885668afb844852": 2021,
+      "131368cc17e44240": 1979,
+      "bc84479c66fe4da6": 1891,
+      "dc221ccc65d34010": 1789,
+      "3c8d5f0b90d7475d": 1704,
+      "df6b47bafe5143f5": 1530
+    }
+  },
+  "exclusion_impact": {
+    "excluded_classes": {
+      "Ampulla of Vater": 10,
+      "Blood - hematin": 12
+    },
+    "total_excluded": 22,
+    "total_active": 47161,
+    "n_missing_from_official_splits": 55
+  },
+  "bbox_area": {
+    "n": 4115,
+    "p10": 0.0172991071428571,
+    "median": 0.046281533446712,
+    "p90": 0.350892857142857,
+    "first_block_downsampling_should_be_removed": true
+  },
+  "normalization_stats": {
+    "all": {
+      "mean": [
+        0.6023374041312549,
+        0.36897971136509816,
+        0.1857726315369089
+      ],
+      "std": [
+        0.18309429097387567,
+        0.13548931521377197,
+        0.0913124561161489
+      ],
+      "n_pixels": 4050957824
+    },
+    "fold_0": {
+      "mean": [
+        0.6037055901457978,
+        0.36502275856959476,
+        0.18396870811761123
+      ],
+      "std": [
+        0.18897844333772523,
+        0.13806908391364306,
+        0.09105099801204544
+      ],
+      "n_pixels": 1825783808
+    },
+    "fold_1": {
+      "mean": [
+        0.6012147899654762,
+        0.37222644186397313,
+        0.18725277382966574
+      ],
+      "std": [
+        0.1781133000774548,
+        0.1332475738917824,
+        0.09149986961377919
+      ],
+      "n_pixels": 2225174016
+    }
+  }
+}
