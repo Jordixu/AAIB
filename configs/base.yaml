@@ -1,0 +1,40 @@
+# Shared defaults for all configs
+seed: 42
+
+# data
+in_memory: false
+lru_size: 8
+batch_size: 32
+num_workers: 4
+persistent_workers: true
+pin_memory: true
+
+# optimizer
+lr: 3.0e-4
+weight_decay: 1.0e-4
+lr_factor: 0.5
+lr_patience: 3
+min_lr: 1.0e-6
+
+# training
+max_epochs: 50
+grad_clip: 1.0
+early_stop_patience: 10
+
+# loss
+bce_pos_weight: null
+focal_gamma: 2.0
+focal_alpha: 0.25
+
+# model (overridden per config)
+model: densenet161_pretrained
+drop_first_downsampling: true
+dropout: 0.0
+pretrained: true
+
+# eval
+target_npv: 0.95
+
+# tracking
+wandb_enabled: false
+wandb_project: kvasir-triage
