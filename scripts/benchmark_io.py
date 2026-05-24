@@ -33,7 +33,7 @@ def main():
 
     mf = manifest_path()
     if not mf.exists():
-        mf = outputs_root().parent / "outputs_phase1_2_3" / "preprocessed_manifest.csv"
+        raise FileNotFoundError(f"Manifest not found at {mf}. Run preprocess.py first.")
     df = pd.read_csv(mf)
 
     configs = [

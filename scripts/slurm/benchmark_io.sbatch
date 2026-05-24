@@ -16,14 +16,16 @@
 
 set -euo pipefail
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "$PROJECT_ROOT"
+cd "$SLURM_SUBMIT_DIR"
 
 mkdir -p "$HOME/logs"
 
 module load conda
 conda activate aabi
-source "$PROJECT_ROOT/.venv/bin/activate"
+source "$SLURM_SUBMIT_DIR/.venv/bin/activate"
+
+export PYTHONUNBUFFERED=1
+export ALBUMENTATIONS_NO_VERSION_CHECK=1
 
 FOLD="${FOLD:-0}"
 

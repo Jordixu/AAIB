@@ -3,9 +3,8 @@
 #SBATCH -p gpu
 #SBATCH --output=/home/%u/logs/train_%j.out
 #SBATCH --error=/home/%u/logs/train_%j.err
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:h100:1
 #SBATCH --mem=64G
-#SBATCH --cpus-per-task=32
 #SBATCH --time=12:00:00
 
 # Usage: sbatch scripts/slurm/train.sbatch --config configs/densenet161_pretrained.yaml --fold 0
@@ -13,13 +12,16 @@
 
 set -euo pipefail
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "$PROJECT_ROOT"
+cd "$SLURM_SUBMIT_DIR"
 
 mkdir -p "$HOME/logs"
 
 module load conda
 conda activate aabi
-source "$PROJECT_ROOT/.venv/bin/activate"
+source "$SLURM_SUBMIT_DIR/.venv/bin/activate"
+
+export PYTHONUNBUFFERED=1
+export ALBUMENTATIONS_NO_VERSION_CHECK=1
+export TORCH_HOME="$SLURM_SUBMIT_DIR/weights"
 
 python scripts/train.py "$@"

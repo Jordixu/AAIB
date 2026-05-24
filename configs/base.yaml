@@ -2,8 +2,8 @@
 seed: 42
 
 # data
-in_memory: false
-lru_size: 8
+in_memory: true
+lru_size: 16
 batch_size: 32
 num_workers: 4
 persistent_workers: true
