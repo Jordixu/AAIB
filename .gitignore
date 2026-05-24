@@ -43,6 +43,9 @@ data/kvasir-capsule/
 # Datafiles are too large to track
 /data/
 
+# Pretrained weights (download locally with scripts/download_weights.py, then upload to cluster)
+weights/hub/
+
 # Temporary excluded
 docs/
 
