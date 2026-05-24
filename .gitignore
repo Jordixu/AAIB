@@ -40,7 +40,6 @@ Thumbs.db
 #original repo
 data/kvasir-capsule/
 
-# data (too large)
-data/
+/data/
 
 docs/
