@@ -1,7 +1,5 @@
-"""Canonical label definitions and binary mapping."""
+"""Label definitions and binary mapping."""
 
-# Maps on-disk directory names (lowercase_underscore) to canonical class names.
-# Used by scan_images() so the manifest always stores canonical names.
 DIR_NAME_MAP: dict[str, str] = {
     "ampulla_of_vater": "Ampulla of Vater",
     "angiectasia": "Angiectasia",
@@ -37,8 +35,7 @@ CANONICAL_LABELS = [
     "Ampulla of Vater",
 ]
 
-# Excluded from training - single-video classes that would cause patient leakage
-# if their sole video appears in both train and test splits
+# Excluded from project
 EXCLUDED_CLASSES = {"Ampulla of Vater", "Blood - hematin", "Polyp"}
 
 # Subclasses that are anatomical landmarks (not pathology) -> Normal
