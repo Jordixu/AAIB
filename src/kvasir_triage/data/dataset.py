@@ -74,27 +74,30 @@ class KvasirInMemoryDataset(Dataset):
     def __init__(self, manifest: pd.DataFrame, transform=None) -> None:
         self.manifest = manifest.reset_index(drop=True)
         self.transform = transform
+        _load_shard.cache_clear()  # free shard LRU cache before bulk load
         self._images, self._labels, self._subclasses = self._load_all()
 
     def _load_all(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        # group by shard to avoid re-opening
+        n = len(self.manifest)
         groups = self.manifest.groupby("shard_rel_path", sort=False)
-        img_list, lbl_list, sub_list = [], [], []
+        images_out = None
+        lbl_arr = np.empty(n, dtype=np.int8)
+        sub_arr = np.empty(n, dtype=object)
 
         for rel, grp in groups:
             shard_path = str(_shard_rel_to_abs(rel))
-            data = np.load(shard_path, allow_pickle=False)
-            for _, row in grp.iterrows():
-                li = int(row["local_idx"])
-                img_list.append(data["images"][li])
-                lbl_list.append(int(row["binary_label"]))
-                sub_list.append(str(row["subclass"]))
+            shard = np.load(shard_path, allow_pickle=False)
+            shard_images = shard["images"]
+            if images_out is None:
+                images_out = np.empty((n, *shard_images.shape[1:]), dtype=shard_images.dtype)
+            dest = grp.index.to_numpy()
+            local_idxs = grp["local_idx"].to_numpy(dtype=int)
+            images_out[dest] = shard_images[local_idxs]
+            lbl_arr[dest] = grp["binary_label"].to_numpy(dtype=np.int8)
+            sub_arr[dest] = grp["subclass"].to_numpy()
+            del shard, shard_images  # free shard before loading the next one
 
-        return (
-            np.stack(img_list),
-            np.array(lbl_list, dtype=np.int8),
-            np.array(sub_list),
-        )
+        return images_out, lbl_arr, np.array(sub_arr, dtype=str)
 
     def __len__(self) -> int:
         return len(self._images)
