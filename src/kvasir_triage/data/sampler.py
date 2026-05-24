@@ -15,7 +15,8 @@ def make_weighted_sampler(labels: list[int] | np.ndarray) -> WeightedRandomSampl
     labels = np.asarray(labels)
     classes, counts = np.unique(labels, return_counts=True)
     class_weight = 1.0 / counts
-    sample_weight = np.array([class_weight[np.where(classes == l)[0][0]] for l in labels])
+    weight_map = dict(zip(classes, class_weight))
+    sample_weight = np.array([weight_map[l] for l in labels])
     return WeightedRandomSampler(
         weights=torch.from_numpy(sample_weight).double(),
         num_samples=len(sample_weight),
