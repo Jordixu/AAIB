@@ -39,7 +39,7 @@ class ConditionalLoss:
         """Switch to Focal if conditions are met. Returns True if switched this call."""
         if self.switched:
             return False
-        soft_recall = max(
+        soft_recall = min(
             (per_subclass_recall.get(c, 1.0) for c in SOFT_TISSUE), default=1.0
         )
         bleed_recall = min(
