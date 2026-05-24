@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kvasir-triage"
+version = "0.1.0"
+description = "Binary triage filter (Normal vs Suspicious) for VCE frames on Kvasir-Capsule"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "Pillow>=10.0",
+    "scikit-learn>=1.3",
+    "albumentations>=1.3",
+    "grad-cam>=1.4",
+    "pyyaml>=6.0",
+    "psutil>=5.9",
+    "tqdm>=4.65",
+    "wandb>=0.15",
+    "matplotlib>=3.7",
+    "seaborn>=0.12",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "pytest-cov"]
+
+[project.scripts]
+kvasir-train = "kvasir_triage.scripts.train:main"
+kvasir-smoke = "kvasir_triage.scripts.smoke_test:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
