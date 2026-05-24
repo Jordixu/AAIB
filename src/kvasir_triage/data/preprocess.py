@@ -9,10 +9,8 @@ from PIL import Image
 
 from kvasir_triage.data.masks import make_corner_polygon_mask, apply_mask
 
-
 TARGET_SIZE = 336
 SHARD_SIZE = 512
-
 
 def preprocess_image_to_uint8(
     image_path: Path | str,
@@ -21,7 +19,7 @@ def preprocess_image_to_uint8(
 ) -> np.ndarray:
     """Load, resize, apply corner mask, return uint8 HWC array."""
     img = Image.open(image_path).convert("RGB")
-    img = img.resize((target_size, target_size), Image.LANCZOS)
+    img = img.resize((target_size, target_size), Image.LANCZOS) # high-quality downsampling
     arr = np.array(img, dtype=np.uint8)
     if mask is None:
         mask = make_corner_polygon_mask(target_size)
