@@ -1,8 +1,4 @@
-"""CLI for Phases 1+2: build fold manifests, bbox enrichment, write NPZ shards,
-and compute per-fold normalization statistics.
-
-Replaces notebook cells 1-7 (and the normalization stats from cell 11).
-Safe to re-run: existing shards are skipped by default (--skip-existing).
+"""Preprocess the data and pack into shards, building a manifest with metadata and computing normalization stats.
 """
 import argparse
 import sys
@@ -17,7 +13,6 @@ from kvasir_triage.data.labels import BINARY_LABEL, DIR_NAME_MAP, EXCLUDED_CLASS
 from kvasir_triage.data.masks import make_corner_polygon_mask
 from kvasir_triage.data.preprocess import SHARD_SIZE, TARGET_SIZE, write_npz_shard
 from kvasir_triage.data.splits import (
-    assign_polyp_fold_by_group,
     build_split_index,
     load_official_splits,
     reserve_test_videos,
@@ -50,21 +45,10 @@ def scan_images(labelled_images_dir: Path) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _find_metadata_csv(project_root: Path) -> Path | None:
-    """Locate metadata.csv with bounding-box coordinates."""
-    candidates = [
-        project_root / "data" / "metadata.csv",
-    ]
-    for c in candidates:
-        if c.exists():
-            return c
-    return None
-
-
 def _load_bbox_norm_areas(metadata_csv: Path, img_size: int, log) -> pd.Series:
     """Return a Series of normalized bbox area keyed by image stem.
 
-    Handles both the raw metadata format (x1..x4, y1..y4) and the already-
+    Handles both the raw metadata format (x1..x4, y1..y4) and the already
     processed bbox_areas.csv (bbox_norm_area column).
     """
     # Kvasir metadata uses semicolon separation
@@ -166,7 +150,7 @@ def main():
 
     root = outputs_root().parent
 
-    # --- Locate labelled_images ---
+    # Locate labelled images
     if args.labelled_images is None:
         candidates = [
             root / "labelled_images-20260522T151751Z-3-001" / "labelled_images",
@@ -180,7 +164,7 @@ def main():
             log.error("labelled_images/ not found. Tried: %s", candidates)
             sys.exit(1)
 
-    # --- Locate official splits ---
+    # Search for the offitial splits (see doc for some information)
     if args.splits_dir is None:
         args.splits_dir = default_splits_dir()
     if not args.splits_dir.exists():
@@ -190,15 +174,15 @@ def main():
     log.info("labelled_images: %s", args.labelled_images)
     log.info("splits dir: %s", args.splits_dir)
 
-    # --- Scan images ---
+    # Scan images
     log.info("Scanning images ...")
     df = scan_images(args.labelled_images)
     log.info("Found %d images across %d subclasses", len(df), df["subclass"].nunique())
     for sub, cnt in df["subclass"].value_counts().items():
         log.debug("  %-30s %d", sub, cnt)
 
-    # --- Load bbox metadata ---
-    metadata_csv = _find_metadata_csv(root)
+    # Load bbox metadata
+    metadata_csv = root / "data" / "metadata.csv"
     if metadata_csv is not None:
         log.info("Loading bbox metadata from %s", metadata_csv)
         bbox_areas = _load_bbox_norm_areas(metadata_csv, args.target_size, log)
@@ -209,11 +193,9 @@ def main():
         log.warning("metadata.csv not found; bbox_norm_area will be NaN in manifest.")
         df["bbox_norm_area"] = float("nan")
 
-    # --- Assign folds ---
+    # Assign folds
     log.info("Loading official splits from %s", args.splits_dir)
     official_mapping = load_official_splits(args.splits_dir)
-    polyp_stems = df[df["subclass"] == "Polyp"]["stem"].tolist()
-    polyp_assignment = assign_polyp_fold_by_group(polyp_stems, seed=args.seed)
 
     test_video_ids: set[str] | None = None
     if args.test_fraction > 0.0:
@@ -221,7 +203,7 @@ def main():
         log.info("Reserving %d videos as held-out test set (fold=2): %s",
                  len(test_video_ids), sorted(test_video_ids))
 
-    df = build_split_index(df, official_mapping, polyp_assignment, test_video_ids=test_video_ids)
+    df = build_split_index(df, official_mapping, test_video_ids=test_video_ids)
     log.info(
         "Split: fold_0=%d  fold_1=%d  test=%d",
         (df["fold"] == 0).sum(),
@@ -229,7 +211,7 @@ def main():
         (df["fold"] == 2).sum(),
     )
 
-    # --- Build corner mask and save ---
+    # Build corner mask and save
     mask = make_corner_polygon_mask(args.target_size)
     preprocessed_root().mkdir(parents=True, exist_ok=True)
     mask_path = preprocessed_root() / "corner_keep_mask_336.npy"
@@ -237,7 +219,7 @@ def main():
     log.info("Corner mask saved to %s", mask_path)
     shards_root().mkdir(parents=True, exist_ok=True)
 
-    # --- Write shards and build manifest ---
+    # Write shards and build manifest
     shard_meta = []
     active_folds = [0, 1] + ([2] if (df["fold"] == 2).any() else [])
     for fold in active_folds:
@@ -274,14 +256,14 @@ def main():
     manifest_df.to_csv(manifest_path, index=False)
     log.info("Manifest written to %s  (%d rows)", manifest_path, len(manifest_df))
 
-    # --- Normalization statistics ---
+    # Normalization statistics
     if not args.no_norm_stats:
         norm_stats = _compute_norm_stats(manifest_df, mask, log)
         norm_path = preprocessed_root() / "normalization_stats.json"
         save_json(norm_stats, norm_path)
         log.info("Normalization stats written to %s", norm_path)
 
-    # --- Preprocessing config ---
+    # Preprocessing config
     save_json({
         "target_size": args.target_size,
         "shard_size": args.shard_size,
