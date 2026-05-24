@@ -3,7 +3,7 @@ import numpy as np
 import torch
 
 
-def set_all_seeds(seed: int = 42) -> None:
+def set_all_seeds(seed: int = 33) -> None:
     """Set seeds for Python, NumPy, and PyTorch (CPU + CUDA)."""
     random.seed(seed)
     np.random.seed(seed)
