@@ -1,0 +1,41 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# outputs - keep structure, ignore data
+outputs/preprocessed/shards/
+outputs/runs/
+outputs/cv_summary/
+outputs/eda/*.png
+outputs/io_benchmark.csv
+*.npz
+
+# notebooks
+.ipynb_checkpoints/
+
+# env
+.env
+*.env
+
+# conda/venv
+env/
+venv/
+.venv/
+
+# wandb
+wandb/
+
+# editors
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+#original repo
+data/kvasir-capsule/
