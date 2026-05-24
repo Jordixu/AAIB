@@ -164,7 +164,7 @@ def main():
             log.error("labelled_images/ not found. Tried: %s", candidates)
             sys.exit(1)
 
-    # Search for the offitial splits (see doc for some information)
+    # Search for the official splits (see doc for some information)
     if args.splits_dir is None:
         args.splits_dir = default_splits_dir()
     if not args.splits_dir.exists():
@@ -183,7 +183,7 @@ def main():
 
     # Load bbox metadata
     metadata_csv = root / "data" / "metadata.csv"
-    if metadata_csv is not None:
+    if metadata_csv.exists():
         log.info("Loading bbox metadata from %s", metadata_csv)
         bbox_areas = _load_bbox_norm_areas(metadata_csv, args.target_size, log)
         df["bbox_norm_area"] = df["stem"].map(bbox_areas)
