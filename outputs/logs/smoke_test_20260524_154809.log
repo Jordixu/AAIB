@@ -1,0 +1,6 @@
+15:48:09  INFO     Log: D:\Downloads\treball\treball\outputs\logs\smoke_test_20260524_154809.log
+15:48:09  INFO     Running smoke test (synthetic data, tiny model, CPU) ...
+15:48:12  INFO     Epoch 0: val_pr_auc=0.5789
+15:48:13  INFO     Epoch 1: val_pr_auc=0.6744
+15:48:14  INFO     Smoke test complete. Best PR-AUC: 0.6744
+15:48:14  INFO     PASS: PR-AUC > 0.5, gradients flowing.

@@ -1,0 +1,123 @@
+11:50:54  INFO     Log: D:\Downloads\treball\treball\outputs\logs\preprocess_20260524_115054.log
+11:50:54  INFO     labelled_images: D:\Downloads\treball\treball\data\labelled_images
+11:50:54  INFO     splits dir: D:\Downloads\treball\treball\data\official_splits
+11:50:54  INFO     Scanning images ...
+11:50:58  INFO     Found 47238 images across 14 subclasses
+11:50:58  DEBUG      normal_clean_mucosa            34338
+11:50:58  DEBUG      ileocecal_valve                4189
+11:50:58  DEBUG      reduced_mucosal_view           2906
+11:50:58  DEBUG      pylorus                        1529
+11:50:58  DEBUG      angiectasia                    866
+11:50:58  DEBUG      ulcer                          854
+11:50:58  DEBUG      foreign_body                   776
+11:50:58  DEBUG      lymphangiectasia               592
+11:50:58  DEBUG      erosion                        506
+11:50:58  DEBUG      blood_fresh                    446
+11:50:58  DEBUG      erythema                       159
+11:50:58  DEBUG      polyp                          55
+11:50:58  DEBUG      blood_hematin                  12
+11:50:58  DEBUG      ampulla_of_vater               10
+11:50:58  INFO     Loading bbox metadata from D:\Downloads\treball\treball\data\metadata.csv
+11:50:59  DEBUG    Metadata CSV columns: ['filename', 'video_id', 'frame_number', 'finding_category', 'finding_class', 'x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4']
+11:50:59  INFO       bbox_norm_area populated for 4243 / 47238 rows
+11:50:59  INFO     Loading official splits from D:\Downloads\treball\treball\data\official_splits
+11:51:00  INFO     Split: fold_0=23061  fold_1=24101
+11:51:00  INFO     Corner mask saved to D:\Downloads\treball\treball\outputs\preprocessed\corner_keep_mask_336.npy
+11:51:00  INFO     Writing fold 0 (23061 images) ...
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0000.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0001.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0002.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0003.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0004.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0005.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0006.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0007.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0008.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0009.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0010.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0011.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0012.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0013.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0014.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0015.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0016.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0017.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0018.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0019.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0020.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0021.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0022.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0023.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0024.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0025.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0026.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0027.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0028.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0029.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0030.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0031.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0032.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0033.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0034.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0035.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0036.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0037.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0038.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0039.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0040.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0041.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0042.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0043.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0044.npz
+11:51:00  DEBUG      Skipping existing shard: fold0_shard_0045.npz
+11:51:00  INFO     Writing fold 1 (24101 images) ...
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0000.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0001.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0002.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0003.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0004.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0005.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0006.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0007.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0008.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0009.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0010.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0011.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0012.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0013.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0014.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0015.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0016.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0017.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0018.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0019.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0020.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0021.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0022.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0023.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0024.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0025.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0026.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0027.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0028.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0029.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0030.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0031.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0032.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0033.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0034.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0035.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0036.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0037.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0038.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0039.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0040.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0041.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0042.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0043.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0044.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0045.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0046.npz
+11:51:00  DEBUG      Skipping existing shard: fold1_shard_0047.npz
+11:51:01  INFO     Manifest written to D:\Downloads\treball\treball\outputs\preprocessed\manifest.csv  (47162 rows)
+11:51:02  INFO     Computing normalization stats (all) over 94 shards ...

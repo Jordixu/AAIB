@@ -1,0 +1,28 @@
+10:48:10  INFO     Log: D:\Downloads\treball\treball\outputs\logs\preprocess_20260524_104810.log
+10:48:10  INFO     labelled_images: D:\Downloads\treball\treball\data\labelled_images
+10:48:10  INFO     kvasir-capsule repo: D:\Downloads\treball\treball\data\kvasir-capsule
+10:48:10  INFO     Scanning images ...
+10:48:11  INFO     Found 47238 images across 14 subclasses
+10:48:11  DEBUG      normal_clean_mucosa            34338
+10:48:11  DEBUG      ileocecal_valve                4189
+10:48:11  DEBUG      reduced_mucosal_view           2906
+10:48:11  DEBUG      pylorus                        1529
+10:48:11  DEBUG      angiectasia                    866
+10:48:11  DEBUG      ulcer                          854
+10:48:11  DEBUG      foreign_body                   776
+10:48:11  DEBUG      lymphangiectasia               592
+10:48:11  DEBUG      erosion                        506
+10:48:11  DEBUG      blood_fresh                    446
+10:48:11  DEBUG      erythema                       159
+10:48:11  DEBUG      polyp                          55
+10:48:11  DEBUG      blood_hematin                  12
+10:48:11  DEBUG      ampulla_of_vater               10
+10:48:11  INFO     Loading bbox metadata from D:\Downloads\treball\treball\data\metadata.csv
+10:48:11  DEBUG    Metadata CSV columns: ['filename', 'video_id', 'frame_number', 'finding_category', 'finding_class', 'x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4']
+10:48:11  INFO       bbox_norm_area populated for 4243 / 47238 rows
+10:48:11  INFO     Loading official splits from D:\Downloads\treball\treball\data\kvasir-capsule
+10:48:12  INFO     Split: fold_0=0  fold_1=0
+10:48:12  INFO     Corner mask saved to D:\Downloads\treball\treball\outputs\preprocessed\corner_keep_mask_336.npy
+10:48:12  INFO     Writing fold 0 (0 images) ...
+10:48:12  INFO     Writing fold 1 (0 images) ...
+10:48:12  INFO     Manifest written to D:\Downloads\treball\treball\outputs\preprocessed\manifest.csv  (0 rows)
