@@ -1,0 +1,10 @@
+# Smoke test config: tiny model, 2 epochs, 5 batches max
+model: tiny
+max_epochs: 2
+max_batches: 5
+batch_size: 8
+num_workers: 0
+persistent_workers: false
+in_memory: false
+wandb_enabled: false
+lr: 1.0e-3
