@@ -7,7 +7,7 @@ from typing import Any
 
 import torch
 import torch.nn as nn
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
 
 from kvasir_triage.eval.metrics import compute_metrics, per_subclass_recall
