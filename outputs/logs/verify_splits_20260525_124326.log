@@ -1,0 +1,23 @@
+12:43:26  INFO     Log: D:\Git\AAIB\outputs\logs\verify_splits_20260525_124326.log
+12:43:26  INFO     Folds in manifest: [np.int64(0), np.int64(1), np.int64(2)]
+12:43:26  INFO     Leakage audit written to D:\Git\AAIB\outputs\preprocessed\leakage_audit.csv
+12:43:26  ERROR    FAIL: subclass 'Angiectasia' absent from fold(s) [np.int64(1)]
+12:43:26  ERROR    FAIL: subclass 'Blood - fresh' absent from fold(s) [np.int64(1)]
+12:43:26  ERROR    FAIL: subclass 'Ulcer' absent from fold(s) [np.int64(2)]
+12:43:26  INFO     fold_0: 15363 images, 16 videos
+12:43:26  INFO     fold_1: 21092 images, 19 videos
+12:43:26  INFO     test: 10706 images, 8 videos
+12:43:26  INFO     Subclass counts per fold:
+fold                      0      1     2
+subclass                                
+Angiectasia             758      0   108
+Blood - fresh           424      0    22
+Erosion                 198    292    16
+Erythema                 27    123     9
+Foreign body            180    579    17
+Ileocecal valve         922    858  2409
+Lymphangiectasia        150    368    74
+Normal clean mucosa   11300  16939  6099
+Pylorus                 560    582   387
+Reduced mucosal view    717    624  1565
+Ulcer                   127    727     0

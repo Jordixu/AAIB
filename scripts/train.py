@@ -34,6 +34,7 @@ def main():
     args = parser.parse_args()
 
     cfg = load_config(args.config)
+    cfg["fold"] = args.fold
     if args.max_epochs is not None:
         cfg["max_epochs"] = args.max_epochs
     if args.max_batches is not None:

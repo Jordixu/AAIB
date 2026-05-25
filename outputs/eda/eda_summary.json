@@ -40,6 +40,107 @@
       "Blood - fresh": 0
     }
   },
+  "split_balance": {
+    "counts": {
+      "CV fold 0": {
+        "Angiectasia": 760,
+        "Blood - fresh": 22,
+        "Erosion": 81,
+        "Erythema": 36,
+        "Foreign body": 203,
+        "Ileocecal valve": 2408,
+        "Lymphangiectasia": 224,
+        "Normal clean mucosa": 10556,
+        "Pylorus": 578,
+        "Reduced mucosal view": 762,
+        "Ulcer": 272
+      },
+      "CV fold 1": {
+        "Angiectasia": 67,
+        "Blood - fresh": 424,
+        "Erosion": 377,
+        "Erythema": 0,
+        "Foreign body": 0,
+        "Ileocecal valve": 902,
+        "Lymphangiectasia": 368,
+        "Normal clean mucosa": 14755,
+        "Pylorus": 519,
+        "Reduced mucosal view": 1974,
+        "Ulcer": 582
+      },
+      "Test": {
+        "Angiectasia": 39,
+        "Blood - fresh": 0,
+        "Erosion": 48,
+        "Erythema": 123,
+        "Foreign body": 573,
+        "Ileocecal valve": 879,
+        "Lymphangiectasia": 0,
+        "Normal clean mucosa": 9027,
+        "Pylorus": 432,
+        "Reduced mucosal view": 170,
+        "Ulcer": 0
+      }
+    },
+    "proportions_pct": {
+      "CV fold 0": {
+        "Angiectasia": 87.8,
+        "Blood - fresh": 4.9,
+        "Erosion": 16.0,
+        "Erythema": 22.6,
+        "Foreign body": 26.2,
+        "Ileocecal valve": 57.5,
+        "Lymphangiectasia": 37.8,
+        "Normal clean mucosa": 30.7,
+        "Pylorus": 37.8,
+        "Reduced mucosal view": 26.2,
+        "Ulcer": 31.9
+      },
+      "CV fold 1": {
+        "Angiectasia": 7.7,
+        "Blood - fresh": 95.1,
+        "Erosion": 74.5,
+        "Erythema": 0.0,
+        "Foreign body": 0.0,
+        "Ileocecal valve": 21.5,
+        "Lymphangiectasia": 62.2,
+        "Normal clean mucosa": 43.0,
+        "Pylorus": 33.9,
+        "Reduced mucosal view": 67.9,
+        "Ulcer": 68.1
+      },
+      "Test": {
+        "Angiectasia": 4.5,
+        "Blood - fresh": 0.0,
+        "Erosion": 9.5,
+        "Erythema": 77.4,
+        "Foreign body": 73.8,
+        "Ileocecal valve": 21.0,
+        "Lymphangiectasia": 0.0,
+        "Normal clean mucosa": 26.3,
+        "Pylorus": 28.3,
+        "Reduced mucosal view": 5.8,
+        "Ulcer": 0.0
+      }
+    },
+    "missing_from_any_fold": {
+      "Blood - fresh": [
+        "Test"
+      ],
+      "Erythema": [
+        "CV fold 1"
+      ],
+      "Foreign body": [
+        "CV fold 1"
+      ],
+      "Lymphangiectasia": [
+        "Test"
+      ],
+      "Ulcer": [
+        "Test"
+      ]
+    }
+  },
   "binary_counts_by_fold": {
     "0": {
       "Normal": 14304,

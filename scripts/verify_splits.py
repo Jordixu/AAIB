@@ -1,4 +1,4 @@
-"""Verify that we do not have frames from the same video in different splits."""
+"""Verify split integrity: no video leakage across folds, all subclasses in all folds."""
 import sys
 from pathlib import Path
 
@@ -25,38 +25,65 @@ def audit(manifest_path: Path, log=None) -> bool:
 
     df["video_id"] = df["stem"].apply(infer_video_id)
 
-    fold0_vids = set(df[df["fold"] == 0]["video_id"])
-    fold1_vids = set(df[df["fold"] == 1]["video_id"])
-    overlap = fold0_vids & fold1_vids
+    folds_present = sorted(df["fold"].unique())
+    _log("info", "Folds in manifest: %s", folds_present)
+
+    # --- Video-level leakage check across all fold pairs ---
+    fold_vids = {f: set(df[df["fold"] == f]["video_id"]) for f in folds_present}
+
+    rows = []
+    any_leakage = False
+    for i, fa in enumerate(folds_present):
+        for fb in folds_present[i + 1 :]:
+            overlap = fold_vids[fa] & fold_vids[fb]
+            if overlap:
+                any_leakage = True
+                _log("error", "FAIL: %d videos appear in both fold=%d and fold=%d:", len(overlap), fa, fb)
+                for v in sorted(overlap):
+                    _log("error", "  %s", v)
+                    rows.append({"video_id": v, "leakage_between": f"{fa},{fb}", "leakage": True})
+
+    for f in folds_present:
+        exclusive = fold_vids[f] - set().union(*(fold_vids[g] for g in folds_present if g != f))
+        for v in sorted(exclusive):
+            rows.append({"video_id": v, "leakage_between": str(f), "leakage": False})
 
     out_dir = outputs_root() / "preprocessed"
     out_dir.mkdir(parents=True, exist_ok=True)
     audit_path = out_dir / "leakage_audit.csv"
-
-    rows = []
-    for vid in sorted(overlap):
-        rows.append({"video_id": vid, "folds": "0,1", "leakage": True})
-    for vid in sorted(fold0_vids - overlap):
-        rows.append({"video_id": vid, "folds": "0", "leakage": False})
-    for vid in sorted(fold1_vids - overlap):
-        rows.append({"video_id": vid, "folds": "1", "leakage": False})
-
     pd.DataFrame(rows).to_csv(audit_path, index=False)
     _log("info", "Leakage audit written to %s", audit_path)
 
-    if overlap:
-        _log("error", "FAIL: %d video IDs appear in both folds:", len(overlap))
-        for v in sorted(overlap):
-            _log("error", "  %s", v)
-        return False
+    # --- Subclass coverage check ---
+    subclass_folds = df.groupby("subclass")["fold"].apply(set)
+    expected_folds = set(folds_present)
+    any_missing = False
+    for subclass, present in subclass_folds.items():
+        missing = expected_folds - present
+        if missing:
+            any_missing = True
+            _log("error", "FAIL: subclass '%s' absent from fold(s) %s", subclass, sorted(missing))
 
-    _log("info", "PASS: no patient overlap. Fold 0: %d videos, Fold 1: %d videos.", len(fold0_vids), len(fold1_vids))
-    return True
+    # --- Summary counts ---
+    for f in folds_present:
+        fold_label = "test" if f == 2 else f"fold_{f}"
+        n_imgs = (df["fold"] == f).sum()
+        n_vids = len(fold_vids[f])
+        _log("info", "%s: %d images, %d videos", fold_label, n_imgs, n_vids)
+
+    # Subclass counts per fold
+    counts = df.groupby(["subclass", "fold"]).size().unstack(fill_value=0)
+    _log("info", "Subclass counts per fold:\n%s", counts.to_string())
+
+    ok = not any_leakage and not any_missing
+    if ok:
+        _log("info", "PASS: no leakage, all subclasses present in all folds.")
+    return ok
 
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description="Patient-leakage audit")
+    parser = argparse.ArgumentParser(description="Split integrity audit")
     parser.add_argument("--manifest", type=Path, default=None)
     args = parser.parse_args()
 
@@ -64,10 +91,11 @@ def main():
 
     if args.manifest is None:
         from kvasir_triage.paths import manifest_path
-        p = manifest_path()
-        if not p.exists():
-            p = outputs_root().parent / "outputs_phase1_2_3" / "preprocessed_manifest.csv"
-        args.manifest = p
+        args.manifest = manifest_path()
+
+    if not args.manifest.exists():
+        log.error("Manifest not found: %s", args.manifest)
+        sys.exit(1)
 
     ok = audit(args.manifest, log=log)
     sys.exit(0 if ok else 1)

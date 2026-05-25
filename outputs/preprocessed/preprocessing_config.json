@@ -4,8 +4,8 @@
   "n_total": 47161,
   "excluded_classes": [
     "Blood - hematin",
-    "Polyp",
-    "Ampulla of Vater"
+    "Ampulla of Vater",
+    "Polyp"
   ],
-  "bbox_source": "D:\\Downloads\\treball\\treball\\data\\metadata.csv"
+  "bbox_source": "D:\\Git\\AAIB\\data\\metadata.csv"
 }

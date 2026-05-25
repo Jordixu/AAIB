@@ -12,13 +12,9 @@ import pandas as pd
 from kvasir_triage.data.labels import BINARY_LABEL, DIR_NAME_MAP, EXCLUDED_CLASSES, is_excluded
 from kvasir_triage.data.masks import make_corner_polygon_mask
 from kvasir_triage.data.preprocess import SHARD_SIZE, TARGET_SIZE, write_npz_shard
-from kvasir_triage.data.splits import (
-    build_split_index,
-    load_official_splits,
-    reserve_test_videos,
-)
+from kvasir_triage.data.splits import build_subclass_stratified_splits
 from kvasir_triage.log_setup import setup_logging
-from kvasir_triage.paths import logs_root, outputs_root, preprocessed_root, shards_root, splits_dir as default_splits_dir
+from kvasir_triage.paths import logs_root, outputs_root, preprocessed_root, shards_root
 from kvasir_triage.seeding import set_all_seeds
 from kvasir_triage.utils import save_json
 
@@ -131,8 +127,6 @@ def main():
     parser = argparse.ArgumentParser(description="Preprocess Kvasir-Capsule images to NPZ shards")
     parser.add_argument("--labelled-images", type=Path, default=None,
                         help="Path to labelled_images/ directory")
-    parser.add_argument("--splits-dir", type=Path, default=None,
-                        help="Directory containing split_0.csv and split_1.csv")
     parser.add_argument("--shard-size", type=int, default=SHARD_SIZE)
     parser.add_argument("--target-size", type=int, default=TARGET_SIZE)
     parser.add_argument("--seed", type=int, default=42)
@@ -140,9 +134,9 @@ def main():
                         help="Skip shards that already exist (default: True)")
     parser.add_argument("--no-norm-stats", action="store_true",
                         help="Skip normalization statistics computation")
-    parser.add_argument("--test-fraction", type=float, default=0.0,
-                        help="Fraction of videos to hold out as test set (fold=2). "
-                             "0.0 disables (default). Recommended: 0.2.")
+    parser.add_argument("--test-fraction", type=float, default=0.2,
+                        help="Fraction of each subclass's videos held out as test (fold=2). "
+                             "Default: 0.2.")
     args = parser.parse_args()
 
     log = setup_logging("preprocess", logs_root())
@@ -164,15 +158,7 @@ def main():
             log.error("labelled_images/ not found. Tried: %s", candidates)
             sys.exit(1)
 
-    # Search for the official splits (see doc for some information)
-    if args.splits_dir is None:
-        args.splits_dir = default_splits_dir()
-    if not args.splits_dir.exists():
-        log.error("splits dir not found: %s", args.splits_dir)
-        sys.exit(1)
-
     log.info("labelled_images: %s", args.labelled_images)
-    log.info("splits dir: %s", args.splits_dir)
 
     # Scan images
     log.info("Scanning images ...")
@@ -193,23 +179,28 @@ def main():
         log.warning("metadata.csv not found; bbox_norm_area will be NaN in manifest.")
         df["bbox_norm_area"] = float("nan")
 
-    # Assign folds
-    log.info("Loading official splits from %s", args.splits_dir)
-    official_mapping = load_official_splits(args.splits_dir)
-
-    test_video_ids: set[str] | None = None
-    if args.test_fraction > 0.0:
-        test_video_ids = reserve_test_videos(df, test_fraction=args.test_fraction, seed=args.seed)
-        log.info("Reserving %d videos as held-out test set (fold=2): %s",
-                 len(test_video_ids), sorted(test_video_ids))
-
-    df = build_split_index(df, official_mapping, test_video_ids=test_video_ids)
+    # Assign folds with subclass-stratified video-level splits
+    log.info(
+        "Building subclass-stratified splits (test_fraction=%.2f, seed=%d) ...",
+        args.test_fraction,
+        args.seed,
+    )
+    df = build_subclass_stratified_splits(df, test_fraction=args.test_fraction, seed=args.seed)
     log.info(
         "Split: fold_0=%d  fold_1=%d  test=%d",
         (df["fold"] == 0).sum(),
         (df["fold"] == 1).sum(),
         (df["fold"] == 2).sum(),
     )
+    for sub, grp in df.groupby("subclass"):
+        counts = grp["fold"].value_counts().sort_index()
+        log.info(
+            "  %-30s  fold0=%d  fold1=%d  test=%d",
+            sub,
+            counts.get(0, 0),
+            counts.get(1, 0),
+            counts.get(2, 0),
+        )
 
     # Build corner mask and save
     mask = make_corner_polygon_mask(args.target_size)

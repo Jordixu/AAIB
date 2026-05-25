@@ -51,10 +51,6 @@ def corner_mask_path() -> Path:
     return preprocessed_root() / "corner_keep_mask_336.npy"
 
 
-def splits_dir() -> Path:
-    return data_root() / "official_splits"
-
-
 def configs_root() -> Path:
     return project_root() / "configs"
 

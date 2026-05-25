@@ -1,0 +1,138 @@
+12:04:10  INFO     Log: D:\Git\AAIB\outputs\logs\preprocess_20260525_120410.log
+12:04:10  INFO     labelled_images: D:\Git\AAIB\data\labelled_images
+12:04:10  INFO     Scanning images ...
+12:04:12  INFO     Found 47161 images across 11 subclasses
+12:04:12  DEBUG      Normal clean mucosa            34338
+12:04:12  DEBUG      Ileocecal valve                4189
+12:04:12  DEBUG      Reduced mucosal view           2906
+12:04:12  DEBUG      Pylorus                        1529
+12:04:12  DEBUG      Angiectasia                    866
+12:04:12  DEBUG      Ulcer                          854
+12:04:12  DEBUG      Foreign body                   776
+12:04:12  DEBUG      Lymphangiectasia               592
+12:04:12  DEBUG      Erosion                        506
+12:04:12  DEBUG      Blood - fresh                  446
+12:04:12  DEBUG      Erythema                       159
+12:04:12  INFO     Loading bbox metadata from D:\Git\AAIB\data\metadata.csv
+12:04:12  DEBUG    Metadata CSV columns: ['filename', 'video_id', 'frame_number', 'finding_category', 'finding_class', 'x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4']
+12:04:12  INFO       bbox_norm_area populated for 4166 / 47161 rows
+12:04:12  INFO     Building subclass-stratified splits (test_fraction=0.20, seed=42) ...
+12:04:12  INFO     Split: fold_0=15363  fold_1=21092  test=10706
+12:04:12  INFO       Angiectasia                     fold0=758  fold1=0  test=108
+12:04:12  INFO       Blood - fresh                   fold0=424  fold1=0  test=22
+12:04:12  INFO       Erosion                         fold0=198  fold1=292  test=16
+12:04:12  INFO       Erythema                        fold0=27  fold1=123  test=9
+12:04:12  INFO       Foreign body                    fold0=180  fold1=579  test=17
+12:04:12  INFO       Ileocecal valve                 fold0=922  fold1=858  test=2409
+12:04:12  INFO       Lymphangiectasia                fold0=150  fold1=368  test=74
+12:04:12  INFO       Normal clean mucosa             fold0=11300  fold1=16939  test=6099
+12:04:12  INFO       Pylorus                         fold0=560  fold1=582  test=387
+12:04:12  INFO       Reduced mucosal view            fold0=717  fold1=624  test=1565
+12:04:12  INFO       Ulcer                           fold0=127  fold1=727  test=0
+12:04:12  INFO     Corner mask saved to D:\Git\AAIB\outputs\preprocessed\corner_keep_mask_336.npy
+12:04:12  INFO     Writing fold 0 (15363 images) ...
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0000.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0001.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0002.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0003.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0004.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0005.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0006.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0007.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0008.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0009.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0010.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0011.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0012.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0013.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0014.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0015.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0016.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0017.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0018.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0019.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0020.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0021.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0022.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0023.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0024.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0025.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0026.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0027.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0028.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0029.npz
+12:04:13  DEBUG      Skipping existing shard: fold0_shard_0030.npz
+12:04:13  INFO     Writing fold 1 (21092 images) ...
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0000.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0001.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0002.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0003.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0004.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0005.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0006.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0007.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0008.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0009.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0010.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0011.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0012.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0013.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0014.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0015.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0016.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0017.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0018.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0019.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0020.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0021.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0022.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0023.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0024.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0025.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0026.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0027.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0028.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0029.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0030.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0031.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0032.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0033.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0034.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0035.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0036.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0037.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0038.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0039.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0040.npz
+12:04:13  DEBUG      Skipping existing shard: fold1_shard_0041.npz
+12:04:13  INFO     Writing fold 2 (10706 images) ...
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0000.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0001.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0002.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0003.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0004.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0005.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0006.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0007.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0008.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0009.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0010.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0011.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0012.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0013.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0014.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0015.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0016.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0017.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0018.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0019.npz
+12:04:13  DEBUG      Skipping existing shard: fold2_shard_0020.npz
+12:04:13  INFO     Manifest written to D:\Git\AAIB\outputs\preprocessed\manifest.csv  (47161 rows)
+12:04:13  INFO     Computing normalization stats (all) over 73 shards ...
+12:09:40  INFO       all  mean=[0.6025, 0.3692, 0.1865]  std=[0.1830, 0.1354, 0.0915]
+12:09:41  INFO     Computing normalization stats (fold_0) over 31 shards ...
+12:12:17  INFO       fold_0  mean=[0.6030, 0.3652, 0.1841]  std=[0.1898, 0.1389, 0.0917]
+12:12:17  INFO     Computing normalization stats (fold_1) over 42 shards ...
+12:15:52  INFO       fold_1  mean=[0.6021, 0.3723, 0.1882]  std=[0.1778, 0.1327, 0.0913]
+12:15:53  INFO     Normalization stats written to D:\Git\AAIB\outputs\preprocessed\normalization_stats.json
+12:15:53  INFO     Preprocessing complete.

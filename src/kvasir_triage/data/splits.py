@@ -1,24 +1,10 @@
-"""Official and hybrid patient-level split assignment."""
+"""Subclass-stratified video-level split assignment."""
 from __future__ import annotations
 
 import hashlib
-from pathlib import Path
+import warnings
 
 import pandas as pd
-
-
-def load_official_splits(splits_dir: Path) -> dict[str, int]:
-    """Read split_0.csv / split_1.csv and return image stem -> fold (0 or 1)."""
-    mapping: dict[str, int] = {}
-    for fold_idx, csv_name in enumerate(["split_0.csv", "split_1.csv"]):
-        p = splits_dir / csv_name
-        if not p.exists():
-            raise FileNotFoundError(f"Missing official split file: {p}")
-        df = pd.read_csv(p)
-        for fname in df["filename"]:
-            stem = Path(fname).stem
-            mapping[stem] = fold_idx
-    return mapping
 
 
 def infer_video_id(stem: str) -> str:
@@ -26,109 +12,83 @@ def infer_video_id(stem: str) -> str:
     return stem.split("_")[0]
 
 
-def _resolve_split_conflicts(df: pd.DataFrame) -> pd.DataFrame:
-    """Reassign any image whose video_id spans both folds to a single fold.
-
-    The official split files sometimes place frames from the same video in
-    different folds.  We unify each conflicted video to whichever fold holds
-    the majority of its frames; ties are broken deterministically by hash.
-    """
-    df = df.copy()
-    df["_vid"] = df["stem"].apply(infer_video_id)
-
-    counts = df.groupby(["_vid", "fold"]).size().unstack(fill_value=0)
-    if 0 not in counts.columns or 1 not in counts.columns:
-        df.drop(columns=["_vid"], inplace=True)
-        return df
-
-    conflicted = counts[(counts[0] > 0) & (counts[1] > 0)].index
-    if len(conflicted):
-        import warnings
-        warnings.warn(
-            f"{len(conflicted)} video IDs span both folds in the official splits; "
-            "reassigning each to its majority fold."
-        )
-        for vid in conflicted:
-            n0, n1 = int(counts.loc[vid, 0]), int(counts.loc[vid, 1])
-            if n0 != n1:
-                target = 0 if n0 > n1 else 1
-            else:
-                target = int(hashlib.md5(f"conflict:{vid}".encode()).hexdigest(), 16) % 2
-            df.loc[df["_vid"] == vid, "fold"] = target
-
-    df.drop(columns=["_vid"], inplace=True)
-    return df
-
-
-def reserve_test_videos(
+def build_subclass_stratified_splits(
     image_df: pd.DataFrame,
     test_fraction: float = 0.2,
     seed: int = 42,
-    protected_video_ids: set[str] | None = None,
-) -> set[str]:
-    """Return a set of video IDs to hold out as a stratified test set.
+) -> pd.DataFrame:
+    """Assign each image a fold: 0 (CV train A), 1 (CV train B), 2 (held-out test).
 
-    Stratified by video-level binary label (max over all frames in the video).
-    Videos whose removal would eliminate all training examples of a subclass are
-    automatically protected unless protected_video_ids is explicitly provided.
+    Video-level assignment stratified by subclass so every subclass has
+    representation in all three folds proportional to its total video count.
 
-    The selection is deterministic: same inputs always produce the same test set.
+    For each subclass:
+        - Videos are ranked by deterministic hash(seed, video_id).
+        - round(n * test_fraction) go to fold=2; skipped if the subclass has
+          fewer than 3 videos (all kept in CV folds to avoid empty training sets).
+        - Remaining videos split evenly: first half → fold=0, second half → fold=1.
+
+    When a video's frames span multiple subclasses (rare in Kvasir-Capsule),
+    it is assigned to the subclass contributing the most frames, with hash
+    tie-breaking.
+
+    Parameters
+    ----------
+    image_df : DataFrame with columns: stem, subclass, binary_label
+    test_fraction : proportion of each subclass's videos reserved for test
+    seed : integer seed for deterministic hash-based ordering
     """
     df = image_df.copy()
     df["_vid"] = df["stem"].apply(infer_video_id)
 
-    if protected_video_ids is None:
-        vids_per_subclass = df.groupby("subclass")["_vid"].nunique()
-        sole_subclasses = set(vids_per_subclass[vids_per_subclass == 1].index)
-        protected_video_ids = set()
-        for sc in sole_subclasses:
-            protected_video_ids |= set(df[df["subclass"] == sc]["_vid"])
-
-    vid_df = (
-        df.groupby("_vid")["binary_label"]
-        .max()
-        .reset_index()
-        .rename(columns={"_vid": "video_id"})
+    # Primary subclass per video (max-count wins, hash tie-break for equal counts)
+    vid_subclass = (
+        df.groupby(["_vid", "subclass"])
+        .size()
+        .reset_index(name="n")
+        .sort_values(
+            ["_vid", "n", "subclass"],
+            ascending=[True, False, True],
+        )
+        .drop_duplicates("_vid")
+        .set_index("_vid")["subclass"]
     )
-    candidates = vid_df[~vid_df["video_id"].isin(protected_video_ids)]
 
-    test_vids: set[str] = set()
-    for _label, grp in candidates.groupby("binary_label"):
-        vids = sorted(grp["video_id"].tolist())
-        n_test = max(1, round(len(vids) * test_fraction))
-        ranked = sorted(vids, key=lambda v: hashlib.md5(f"{seed}:test:{v}".encode()).hexdigest())
-        test_vids |= set(ranked[:n_test])
+    vid_fold: dict[str, int] = {}
 
-    return test_vids
+    for subclass, vids_series in vid_subclass.groupby(vid_subclass):
+        vids = sorted(vids_series.index.tolist())
+        n = len(vids)
 
+        # Deterministic shuffle via hash
+        ranked = sorted(
+            vids,
+            key=lambda v: hashlib.md5(f"{seed}:{v}".encode()).hexdigest(),
+        )
 
-def build_split_index(
-    image_df: pd.DataFrame,
-    official_mapping: dict[str, int],
-    test_video_ids: set[str] | None = None,
-) -> pd.DataFrame:
-    """Attach a 'fold' column to image_df.
+        # Only reserve a test slice when we have enough videos for all three
+        # folds to remain non-empty
+        n_test = round(n * test_fraction) if n >= 3 else 0
+        n_remaining = n - n_test
+        n_fold0 = n_remaining // 2
 
-    fold=0 and fold=1 are the cross-validation folds.
-    fold=2 is the held-out test set (assigned when test_video_ids is provided).
+        for i, vid in enumerate(ranked):
+            if i < n_test:
+                vid_fold[vid] = 2
+            elif i < n_test + n_fold0:
+                vid_fold[vid] = 0
+            else:
+                vid_fold[vid] = 1
 
-    image_df must have columns: stem, subclass.
-    Any remaining unassigned images are dropped with a warning.
-    """
-    df = image_df.copy()
-    df["fold"] = df["stem"].map(official_mapping)
+    df["fold"] = df["_vid"].map(vid_fold)
 
     n_missing = df["fold"].isna().sum()
     if n_missing > 0:
-        import warnings
-        warnings.warn(f"{n_missing} images have no fold assignment and will be dropped.")
+        warnings.warn(
+            f"{n_missing} images have no fold assignment and will be dropped."
+        )
         df = df[df["fold"].notna()].copy()
 
     df["fold"] = df["fold"].astype(int)
-    df = _resolve_split_conflicts(df)
-
-    if test_video_ids:
-        test_mask = df["stem"].apply(infer_video_id).isin(test_video_ids)
-        df.loc[test_mask, "fold"] = 2
-
+    df.drop(columns=["_vid"], inplace=True)
     return df
