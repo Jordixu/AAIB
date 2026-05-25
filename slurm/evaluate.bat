@@ -1,5 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
+pushd "%~dp0.."
 
 if "%~1"=="" (
     echo Usage: evaluate.bat [--cpu] ^<run_dir^> [--fold N] [--split val^|train]

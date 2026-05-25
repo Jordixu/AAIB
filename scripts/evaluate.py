@@ -58,7 +58,10 @@ def main():
         mf = outputs_root().parent / "outputs_phase1_2_3" / "preprocessed_manifest.csv"
     df = pd.read_csv(mf)
 
-    _, val_loader = make_dataloaders(df, fold, {**cfg, "num_workers": 0})
+    eval_cfg = {**cfg, "num_workers": 0}
+    if device.type == "cpu":
+        eval_cfg["batch_size"] = min(eval_cfg.get("batch_size", 32), 4)
+    _, val_loader = make_dataloaders(df, fold, eval_cfg)
 
     all_logits, all_labels, all_subclasses = [], [], []
     t0 = time.perf_counter()

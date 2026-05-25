@@ -1,5 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
+pushd "%~dp0.."
 
 if "%~1"=="" (
     echo Usage: evaluate_test.bat [--cpu] ^<run_dir^> [--out PATH]

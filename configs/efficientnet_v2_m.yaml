@@ -1,0 +1,7 @@
+# EfficientNet V2-M pretrained (~54M params)
+model: efficientnet_v2_m
+pretrained: true
+dropout: 0.3
+
+batch_size: 16
+lr: 2.0e-4

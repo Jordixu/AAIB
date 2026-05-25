@@ -139,9 +139,12 @@ def evaluate_test(run_dirs: list[Path], log) -> dict:
     for run_dir in run_dirs:
         log.info("Loading run: %s", run_dir)
         model, t_safe, train_fold, cfg = _load_run(run_dir, device, norm_stats)
+        bs = cfg.get("batch_size", 32)
+        if device.type == "cpu":
+            bs = min(bs, 4)
         logits, labels, subs = _run_inference(
             model, test_df, train_fold, norm_stats, device,
-            batch_size=cfg.get("batch_size", 32),
+            batch_size=bs,
             num_workers=0,
         )
         probs = 1.0 / (1.0 + np.exp(-logits))  # sigmoid
