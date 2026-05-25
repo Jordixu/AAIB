@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.amp import autocast
+from tqdm import tqdm
 
 from kvasir_triage.config import load_config
 from kvasir_triage.data.dataloaders import make_dataloaders
@@ -63,9 +64,9 @@ def main():
     t0 = time.perf_counter()
     n = 0
     with torch.no_grad():
-        for imgs, labels, meta in val_loader:
+        for imgs, labels, meta in tqdm(val_loader, desc="Evaluating"):
             imgs = imgs.to(device)
-            with autocast(enabled=device.type == "cuda"):
+            with autocast(device_type=device.type, enabled=device.type == "cuda"):
                 logits = model(imgs).squeeze(1)
             all_logits.append(logits.cpu().numpy())
             all_labels.append(labels.numpy())

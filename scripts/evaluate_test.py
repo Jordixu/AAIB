@@ -22,6 +22,7 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 from torch.amp import autocast
+from tqdm import tqdm
 
 from kvasir_triage.data.dataset import KvasirNPZShardDataset
 from kvasir_triage.data.transforms import AlbumentationsWrapper, build_eval_transform
@@ -94,9 +95,9 @@ def _run_inference(
 
     all_logits, all_labels, all_subclasses = [], [], []
     with torch.no_grad():
-        for imgs, labels, meta in loader:
+        for imgs, labels, meta in tqdm(loader, desc="Evaluating"):
             imgs = imgs.to(device)
-            with autocast(enabled=device.type == "cuda"):
+            with autocast(device_type=device.type, enabled=device.type == "cuda"):
                 logits = model(imgs).squeeze(1)
             all_logits.append(logits.cpu().numpy())
             all_labels.append(labels.numpy())
