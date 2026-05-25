@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import numpy as np
+from scipy.special import expit
 from sklearn.metrics import (
     average_precision_score,
     matthews_corrcoef,
@@ -14,7 +15,7 @@ def compute_metrics(
     labels: np.ndarray,
     threshold: float = 0.5,
 ) -> dict[str, float]:
-    probs = 1 / (1 + np.exp(-logits))
+    probs = expit(logits)
     preds = (probs >= threshold).astype(int)
 
     pr_auc = float(average_precision_score(labels, probs))
@@ -45,7 +46,7 @@ def per_subclass_recall(
     threshold: float = 0.5,
 ) -> dict[str, float]:
     """Recall per subclass (only for Suspicious=1 subclasses)."""
-    probs = 1 / (1 + np.exp(-logits))
+    probs = expit(logits)
     preds = (probs >= threshold).astype(int)
     subclasses = np.array(subclasses)
     result: dict[str, float] = {}
