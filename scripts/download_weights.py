@@ -16,7 +16,7 @@ from pathlib import Path
 weights_dir = Path(__file__).parent.parent / "weights"
 os.environ["TORCH_HOME"] = str(weights_dir)
 
-from torchvision.models import (  # noqa: E402
+from torchvision.models import (
     densenet161,
     DenseNet161_Weights,
     efficientnet_b0,

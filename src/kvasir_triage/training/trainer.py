@@ -1,14 +1,18 @@
 """Main training loop with AMP, grad clipping, logging, checkpointing."""
 from __future__ import annotations
 
+import logging
 import time
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader
+
+log = logging.getLogger(__name__)
 
 from kvasir_triage.eval.metrics import compute_metrics, per_subclass_recall
 from kvasir_triage.training.checkpoint import save_best_and_last
@@ -23,7 +27,7 @@ def _collect_val_outputs(model, loader, device):
     with torch.no_grad():
         for imgs, labels, meta in loader:
             imgs = imgs.to(device, non_blocking=True)
-            with autocast(enabled=device.type == "cuda"):
+            with autocast(device_type=device.type, enabled=device.type == "cuda"):
                 logits = model(imgs).squeeze(1)
             all_logits.append(logits.cpu())
             all_labels.append(labels)
@@ -68,6 +72,10 @@ def train(
     max_epochs = cfg.get("max_epochs", 50)
     max_batches = cfg.get("max_batches", None)  # for quick tests
     grad_clip = cfg.get("grad_clip", 1.0)
+    log_interval = cfg.get("log_interval", 20)  # batches between progress lines
+
+    n_batches = len(train_loader)
+    log.info("Starting training: epochs %d-%d on %s", start_epoch, max_epochs - 1, device)
 
     for epoch in range(start_epoch, max_epochs):
         model.train()
@@ -83,7 +91,7 @@ def train(
             labels = labels.to(device, non_blocking=True)
 
             optimizer.zero_grad(set_to_none=True)
-            with autocast(enabled=device.type == "cuda"):
+            with autocast(device_type=device.type, enabled=device.type == "cuda"):
                 logits = model(imgs)
                 loss = criterion(logits, labels)
 
@@ -106,6 +114,14 @@ def train(
                     "lr": optimizer.param_groups[0]["lr"],
                     "loss_fn": criterion.name,
                 })
+
+            if (batch_idx + 1) % log_interval == 0 or (batch_idx + 1) == n_batches:
+                log.info(
+                    "Epoch %d  [%d/%d]  loss=%.4f  grad_norm=%.3f  lr=%.2e",
+                    epoch, batch_idx + 1, n_batches,
+                    loss.item(), float(grad_norm),
+                    optimizer.param_groups[0]["lr"],
+                )
 
         train_time = time.perf_counter() - t0
         train_loss = epoch_loss / max(n_samples, 1)
@@ -134,6 +150,13 @@ def train(
             "cfg": cfg,
         }
         save_best_and_last(state, run_dir, is_best)
+        if is_best:
+            np.savez(
+                run_dir / "val_preds_best.npz",
+                logits=logits_np,
+                labels=labels_np,
+                subclasses=np.array(subclasses),
+            )
 
         log_entry = {
             "epoch": epoch,
@@ -150,7 +173,17 @@ def train(
         for lg in loggers:
             lg.log_epoch(log_entry)
 
+        log.info(
+            "Epoch %d done  train_loss=%.4f  val_pr_auc=%.4f  val_mcc=%.4f"
+            "  time=%.1fs  %.1f smp/s%s%s",
+            epoch, train_loss, val_prauc, metrics["mcc"],
+            train_time, samples_per_sec,
+            "  [best]" if is_best else "",
+            f"  [loss→{criterion.name}]" if switched else "",
+        )
+
         if stopper.step(val_prauc):
+            log.info("Early stopping at epoch %d (best val_pr_auc=%.4f)", epoch, best_metric)
             break
 
     return {"best_pr_auc": best_metric, "epochs_run": epoch + 1}
