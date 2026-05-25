@@ -1,11 +1,12 @@
 {
   "target_size": 336,
   "shard_size": 512,
-  "n_total": 47161,
+  "n_total": 46715,
   "excluded_classes": [
+    "Polyp",
+    "Blood - fresh",
     "Blood - hematin",
-    "Ampulla of Vater",
-    "Polyp"
+    "Ampulla of Vater"
   ],
   "bbox_source": "D:\\Git\\AAIB\\data\\metadata.csv"
 }

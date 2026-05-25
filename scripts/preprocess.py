@@ -202,6 +202,29 @@ def main():
             counts.get(2, 0),
         )
 
+    # --- Pre-shard distribution check ---
+    folds_present = sorted(df["fold"].unique())
+    subclass_fold_counts = df.groupby(["subclass", "fold"]).size().unstack(fill_value=0)
+    log.info("Subclass × fold distribution:\n%s", subclass_fold_counts.to_string())
+
+    missing_coverage = []
+    for subclass in subclass_fold_counts.index:
+        for fold in folds_present:
+            if subclass_fold_counts.loc[subclass, fold] == 0:
+                missing_coverage.append((subclass, fold))
+
+    if missing_coverage:
+        for subclass, fold in missing_coverage:
+            log.error("FAIL: subclass '%s' has 0 images in fold %d", subclass, fold)
+        log.error(
+            "Aborting before shard creation: %d subclass/fold slot(s) are empty. "
+            "Re-run with a different --seed or inspect video distribution.",
+            len(missing_coverage),
+        )
+        sys.exit(1)
+
+    log.info("Distribution check PASSED: all subclasses present in all folds.")
+
     # Build corner mask and save
     mask = make_corner_polygon_mask(args.target_size)
     preprocessed_root().mkdir(parents=True, exist_ok=True)
