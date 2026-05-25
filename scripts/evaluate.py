@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 import numpy as np
 import pandas as pd
 import torch
-from torch.cuda.amp import autocast
+from torch.amp import autocast
 
 from kvasir_triage.config import load_config
 from kvasir_triage.data.dataloaders import make_dataloaders

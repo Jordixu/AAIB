@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
-from torch.cuda.amp import autocast
+from torch.amp import autocast
 
 from kvasir_triage.data.dataset import KvasirNPZShardDataset
 from kvasir_triage.data.transforms import AlbumentationsWrapper, build_eval_transform
