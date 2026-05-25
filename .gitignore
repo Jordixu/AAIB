@@ -15,6 +15,7 @@ outputs/io_benchmark.csv
 
 # notebooks
 .ipynb_checkpoints/
+extra/
 
 # env
 .env
