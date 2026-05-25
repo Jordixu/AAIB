@@ -1,0 +1,47 @@
+12:56:14  INFO     Log: D:\Git\AAIB\outputs\logs\preprocess_20260525_125614.log
+12:56:14  INFO     labelled_images: D:\Git\AAIB\data\labelled_images
+12:56:14  INFO     Scanning images ...
+12:56:15  INFO     Found 47161 images across 11 subclasses
+12:56:15  DEBUG      Normal clean mucosa            34338
+12:56:15  DEBUG      Ileocecal valve                4189
+12:56:15  DEBUG      Reduced mucosal view           2906
+12:56:15  DEBUG      Pylorus                        1529
+12:56:15  DEBUG      Angiectasia                    866
+12:56:15  DEBUG      Ulcer                          854
+12:56:15  DEBUG      Foreign body                   776
+12:56:15  DEBUG      Lymphangiectasia               592
+12:56:15  DEBUG      Erosion                        506
+12:56:15  DEBUG      Blood - fresh                  446
+12:56:15  DEBUG      Erythema                       159
+12:56:15  INFO     Loading bbox metadata from D:\Git\AAIB\data\metadata.csv
+12:56:15  DEBUG    Metadata CSV columns: ['filename', 'video_id', 'frame_number', 'finding_category', 'finding_class', 'x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4']
+12:56:15  INFO       bbox_norm_area populated for 4166 / 47161 rows
+12:56:15  INFO     Building subclass-stratified splits (test_fraction=0.20, seed=123) ...
+12:56:15  INFO     Split: fold_0=15943  fold_1=19847  test=11371
+12:56:15  INFO       Angiectasia                     fold0=154  fold1=60  test=652
+12:56:15  INFO       Blood - fresh                   fold0=22  fold1=424  test=0
+12:56:15  INFO       Erosion                         fold0=309  fold1=149  test=48
+12:56:15  INFO       Erythema                        fold0=9  fold1=123  test=27
+12:56:15  INFO       Foreign body                    fold0=590  fold1=6  test=180
+12:56:15  INFO       Ileocecal valve                 fold0=1100  fold1=2600  test=489
+12:56:15  INFO       Lymphangiectasia                fold0=74  fold1=368  test=150
+12:56:15  INFO       Normal clean mucosa             fold0=11957  fold1=13610  test=8771
+12:56:15  INFO       Pylorus                         fold0=318  fold1=575  test=636
+12:56:15  INFO       Reduced mucosal view            fold0=828  fold1=1787  test=291
+12:56:15  INFO       Ulcer                           fold0=582  fold1=145  test=127
+12:56:15  INFO     Subclass × fold distribution:
+fold                      0      1     2
+subclass                                
+Angiectasia             154     60   652
+Blood - fresh            22    424     0
+Erosion                 309    149    48
+Erythema                  9    123    27
+Foreign body            590      6   180
+Ileocecal valve        1100   2600   489
+Lymphangiectasia         74    368   150
+Normal clean mucosa   11957  13610  8771
+Pylorus                 318    575   636
+Reduced mucosal view    828   1787   291
+Ulcer                   582    145   127
+12:56:15  ERROR    FAIL: subclass 'Blood - fresh' has 0 images in fold 2
+12:56:15  ERROR    Aborting before shard creation: 1 subclass/fold slot(s) are empty. Re-run with a different --seed or inspect video distribution.
