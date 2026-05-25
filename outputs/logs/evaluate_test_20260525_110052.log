@@ -1,0 +1,4 @@
+11:00:52  INFO     Log: D:\Git\AAIB\outputs\logs\evaluate_test_20260525_110052.log
+11:00:52  INFO     Device: cpu
+11:00:52  INFO     Test set: 11291 images from 9 unique videos
+11:00:52  INFO     Loading run: outputs\runs\efficientnet_b0_fold1_20260525_012724
