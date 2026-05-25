@@ -1,5 +1,5 @@
 # Shared defaults for all configs
-seed: 42
+seed: 33
 
 # data
 in_memory: true
