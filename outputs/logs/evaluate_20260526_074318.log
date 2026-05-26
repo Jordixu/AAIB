@@ -1,0 +1,6 @@
+07:43:18  INFO     Log: D:\Git\AAIB\outputs\logs\evaluate_20260526_074318.log
+08:19:28  INFO     PR-AUC:  0.6695
+08:19:28  INFO     MCC:     0.6197
+08:19:28  INFO     NPV:     0.9611
+08:19:28  INFO     t_safe:  0.99
+08:19:28  INFO     Speed:   8.8 img/s  (114.19 ms/img)
