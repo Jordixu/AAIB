@@ -15,6 +15,7 @@ outputs/io_benchmark.csv
 
 # notebooks
 .ipynb_checkpoints/
+extra/
 
 # env
 .env
@@ -51,3 +52,5 @@ docs/
 
 # Testing modules
 /tests/
+outputs/preprocessed.zip
+outputs/old_runs/

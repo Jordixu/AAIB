@@ -1,13 +1,16 @@
 """Evaluate trained model(s) on the held-out test set (fold=2).
 
 Run after training and evaluate.py (threshold calibration must exist).
-Uses the NPV-safe threshold calibrated on the validation fold — the test set
+Uses the NPV-safe threshold calibrated on the validation fold - the test set
 is never used for calibration.
 
 Single model:
     python scripts/evaluate_test.py outputs/runs/myrun_fold0
 
-Ensemble from a full CV run (recommended):
+Ensemble (recommended):
+    python scripts/evaluate_test.py outputs/runs/myrun_fold0 outputs/runs/myrun_fold1
+
+Ensemble from CV summary:
     python scripts/evaluate_test.py --cv-summary outputs/cv_summary/myrun
 """
 import argparse
@@ -42,11 +45,18 @@ def _load_run(run_dir: Path, device: torch.device, norm_stats: dict) -> tuple:
     """
     cfg_path = run_dir / "config.snapshot.yaml"
     if not cfg_path.exists():
-        raise FileNotFoundError(f"No config.snapshot.yaml in {run_dir}")
+        cfg_path = run_dir / "config.snapshot.json"
+    if not cfg_path.exists():
+        raise FileNotFoundError(f"No config.snapshot.yaml or .json in {run_dir}")
 
-    import yaml
-    with open(cfg_path) as f:
-        cfg = yaml.safe_load(f)
+    if cfg_path.suffix == ".json":
+        import json
+        with open(cfg_path) as f:
+            cfg = json.load(f)
+    else:
+        import yaml
+        with open(cfg_path) as f:
+            cfg = yaml.safe_load(f)
 
     ckpt_path = run_dir / "checkpoints" / "best.pt"
     if not ckpt_path.exists():
@@ -139,10 +149,15 @@ def evaluate_test(run_dirs: list[Path], log) -> dict:
     for run_dir in run_dirs:
         log.info("Loading run: %s", run_dir)
         model, t_safe, train_fold, cfg = _load_run(run_dir, device, norm_stats)
+        bs = cfg.get("batch_size", 32)
+        nw = cfg.get("num_workers", 4)
+        if device.type == "cpu":
+            bs = min(bs, 4)
+            nw = 0
         logits, labels, subs = _run_inference(
             model, test_df, train_fold, norm_stats, device,
-            batch_size=cfg.get("batch_size", 32),
-            num_workers=0,
+            batch_size=bs,
+            num_workers=nw,
         )
         probs = 1.0 / (1.0 + np.exp(-logits))  # sigmoid
         all_probs.append(probs)
@@ -226,11 +241,10 @@ def _find_run_dirs_from_cv(cv_summary_dir: Path) -> list[Path]:
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate on held-out test set (fold=2)")
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("run_dir", type=Path, nargs="?",
-                       help="Single run directory (outputs/runs/myrun_fold0)")
-    group.add_argument("--cv-summary", type=Path, metavar="CV_DIR",
-                       help="CV summary directory to ensemble both fold models")
+    parser.add_argument("run_dirs", type=Path, nargs="*",
+                        help="One or more run directories to ensemble")
+    parser.add_argument("--cv-summary", type=Path, metavar="CV_DIR",
+                        help="CV summary directory to ensemble both fold models")
     parser.add_argument("--out", type=Path, default=None,
                         help="Output path for test_results.json (default: outputs/test_evaluation/)")
     args = parser.parse_args()
@@ -240,8 +254,10 @@ def main():
     if args.cv_summary:
         run_dirs = _find_run_dirs_from_cv(args.cv_summary)
         log.info("Ensembling %d models from CV run: %s", len(run_dirs), args.cv_summary)
+    elif args.run_dirs:
+        run_dirs = args.run_dirs
     else:
-        run_dirs = [args.run_dir]
+        parser.error("Provide at least one run_dir or --cv-summary")
 
     result = evaluate_test(run_dirs, log)
 

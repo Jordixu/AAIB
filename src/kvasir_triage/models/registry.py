@@ -2,7 +2,12 @@
 import torch.nn as nn
 
 from kvasir_triage.models.densenet import build_densenet161
-from kvasir_triage.models.efficientnet import build_efficientnet_b0
+from kvasir_triage.models.efficientnet import (
+    build_efficientnet_b0,
+    build_efficientnet_v2_s,
+    build_efficientnet_v2_m,
+    build_efficientnet_v2_l,
+)
 from kvasir_triage.models.tiny import build_tiny
 
 
@@ -18,6 +23,18 @@ _BUILDERS = {
         dropout=cfg.get("dropout", 0.0),
     ),
     "efficientnet_b0": lambda cfg: build_efficientnet_b0(
+        pretrained=cfg.get("pretrained", True),
+        dropout=cfg.get("dropout", 0.2),
+    ),
+    "efficientnet_v2_s": lambda cfg: build_efficientnet_v2_s(
+        pretrained=cfg.get("pretrained", True),
+        dropout=cfg.get("dropout", 0.2),
+    ),
+    "efficientnet_v2_m": lambda cfg: build_efficientnet_v2_m(
+        pretrained=cfg.get("pretrained", True),
+        dropout=cfg.get("dropout", 0.2),
+    ),
+    "efficientnet_v2_l": lambda cfg: build_efficientnet_v2_l(
         pretrained=cfg.get("pretrained", True),
         dropout=cfg.get("dropout", 0.2),
     ),

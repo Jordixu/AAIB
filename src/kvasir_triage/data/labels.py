@@ -35,7 +35,7 @@ CANONICAL_LABELS = [
 ]
 
 # Excluded from project
-EXCLUDED_CLASSES = {"Ampulla of Vater", "Blood - hematin", "Polyp"}
+EXCLUDED_CLASSES = {"Ampulla of Vater", "Blood - fresh", "Blood - hematin", "Polyp"}
 
 # Subclasses that are anatomical landmarks (not pathology) -> Normal
 NORMAL_CLASSES = {

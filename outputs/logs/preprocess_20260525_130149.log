@@ -1,0 +1,48 @@
+13:01:49  INFO     Log: D:\Git\AAIB\outputs\logs\preprocess_20260525_130149.log
+13:01:49  INFO     labelled_images: D:\Git\AAIB\data\labelled_images
+13:01:49  INFO     Scanning images ...
+13:01:50  INFO     Found 46715 images across 10 subclasses
+13:01:50  DEBUG      Normal clean mucosa            34338
+13:01:50  DEBUG      Ileocecal valve                4189
+13:01:50  DEBUG      Reduced mucosal view           2906
+13:01:50  DEBUG      Pylorus                        1529
+13:01:50  DEBUG      Angiectasia                    866
+13:01:50  DEBUG      Ulcer                          854
+13:01:50  DEBUG      Foreign body                   776
+13:01:50  DEBUG      Lymphangiectasia               592
+13:01:50  DEBUG      Erosion                        506
+13:01:50  DEBUG      Erythema                       159
+13:01:50  INFO     Loading bbox metadata from D:\Git\AAIB\data\metadata.csv
+13:01:50  DEBUG    Metadata CSV columns: ['filename', 'video_id', 'frame_number', 'finding_category', 'finding_class', 'x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4']
+13:01:50  INFO       bbox_norm_area populated for 3720 / 46715 rows
+13:01:50  INFO     Building subclass-stratified splits (test_fraction=0.20, seed=42) ...
+13:01:50  INFO     Split: fold_0=22505  fold_1=19174  test=5036
+13:01:50  INFO       Angiectasia                     fold0=164  fold1=691  test=11
+13:01:50  INFO       Erosion                         fold0=178  fold1=152  test=176
+13:01:50  INFO       Erythema                        fold0=9  fold1=27  test=123
+13:01:50  INFO       Foreign body                    fold0=197  fold1=573  test=6
+13:01:50  INFO       Ileocecal valve                 fold0=1396  fold1=2199  test=594
+13:01:50  INFO       Lymphangiectasia                fold0=74  fold1=150  test=368
+13:01:50  INFO       Normal clean mucosa             fold0=18421  fold1=12761  test=3156
+13:01:50  INFO       Pylorus                         fold0=723  fold1=536  test=270
+13:01:50  INFO       Reduced mucosal view            fold0=1216  fold1=1503  test=187
+13:01:50  INFO       Ulcer                           fold0=127  fold1=582  test=145
+13:01:50  INFO     Subclass × fold distribution:
+fold                      0      1     2
+subclass                                
+Angiectasia             164    691    11
+Erosion                 178    152   176
+Erythema                  9     27   123
+Foreign body            197    573     6
+Ileocecal valve        1396   2199   594
+Lymphangiectasia         74    150   368
+Normal clean mucosa   18421  12761  3156
+Pylorus                 723    536   270
+Reduced mucosal view   1216   1503   187
+Ulcer                   127    582   145
+13:01:50  INFO     Distribution check PASSED: all subclasses present in all folds.
+13:01:50  INFO     Corner mask saved to D:\Git\AAIB\outputs\preprocessed\corner_keep_mask_336.npy
+13:01:50  INFO     Writing fold 0 (22505 images) ...
+13:01:50  INFO       Writing fold0_shard_0000.npz (512 images) ...
+13:01:51  INFO       Writing fold0_shard_0001.npz (512 images) ...
+13:01:52  INFO       Writing fold0_shard_0002.npz (512 images) ...
