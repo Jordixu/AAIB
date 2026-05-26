@@ -21,11 +21,20 @@ from torchvision.models import (
     DenseNet161_Weights,
     efficientnet_b0,
     EfficientNet_B0_Weights,
+    efficientnet_v2_s,
+    EfficientNet_V2_S_Weights,
+    efficientnet_v2_m,
+    EfficientNet_V2_M_Weights,
+    efficientnet_v2_l,
+    EfficientNet_V2_L_Weights,
 )
 
 MODELS = [
-    ("DenseNet161", densenet161, DenseNet161_Weights.IMAGENET1K_V1),
-    ("EfficientNet-B0", efficientnet_b0, EfficientNet_B0_Weights.IMAGENET1K_V1),
+    ("DenseNet161",        densenet161,      DenseNet161_Weights.IMAGENET1K_V1),
+    ("EfficientNet-B0",    efficientnet_b0,  EfficientNet_B0_Weights.IMAGENET1K_V1),
+    ("EfficientNet-V2-S",  efficientnet_v2_s, EfficientNet_V2_S_Weights.IMAGENET1K_V1),
+    ("EfficientNet-V2-M",  efficientnet_v2_m, EfficientNet_V2_M_Weights.IMAGENET1K_V1),
+    ("EfficientNet-V2-L",  efficientnet_v2_l, EfficientNet_V2_L_Weights.IMAGENET1K_V1),
 ]
 
 if __name__ == "__main__":
