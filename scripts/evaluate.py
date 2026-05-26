@@ -33,11 +33,18 @@ def main():
     run_dir = args.run_dir
     cfg_path = run_dir / "config.snapshot.yaml"
     if not cfg_path.exists():
-        raise FileNotFoundError(f"No config.snapshot.yaml in {run_dir}")
+        cfg_path = run_dir / "config.snapshot.json"
+    if not cfg_path.exists():
+        raise FileNotFoundError(f"No config.snapshot.yaml or .json in {run_dir}")
 
-    import yaml
-    with open(cfg_path) as f:
-        cfg = yaml.safe_load(f)
+    if cfg_path.suffix == ".json":
+        import json
+        with open(cfg_path) as f:
+            cfg = json.load(f)
+    else:
+        import yaml
+        with open(cfg_path) as f:
+            cfg = yaml.safe_load(f)
 
     log = setup_logging("evaluate", logs_root())
 
@@ -58,8 +65,9 @@ def main():
         mf = outputs_root().parent / "outputs_phase1_2_3" / "preprocessed_manifest.csv"
     df = pd.read_csv(mf)
 
-    eval_cfg = {**cfg, "num_workers": 0}
+    eval_cfg = {**cfg}
     if device.type == "cpu":
+        eval_cfg["num_workers"] = 0
         eval_cfg["batch_size"] = min(eval_cfg.get("batch_size", 32), 4)
     _, val_loader = make_dataloaders(df, fold, eval_cfg)
 
