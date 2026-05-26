@@ -53,3 +53,4 @@ docs/
 # Testing modules
 /tests/
 outputs/preprocessed.zip
+outputs/old_runs/
