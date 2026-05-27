@@ -112,17 +112,18 @@ def run_gradcam_audit(
                 "prob": float(probs[i]),
                 "activation_mass": mass,
             }
-            rows.append(row)
 
             # save thumbnail
             img_np = _denormalize_image(imgs[i], mean, std)
             vis = show_cam_on_image(img_np.astype(np.float32), heatmap, use_rgb=True)
             fname = thumb_dir / f"tp_{n:04d}.jpg"
             Image.fromarray(vis).save(fname)
+            row["thumbnail_path"] = str(fname.relative_to(out_dir))
+            rows.append(row)
             n += 1
 
     csv_path = out_dir / "activation_mass.csv"
-    fieldnames = ["subclass", "rel_path", "prob", "activation_mass"]
+    fieldnames = ["subclass", "rel_path", "prob", "activation_mass", "thumbnail_path"]
     with open(csv_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()

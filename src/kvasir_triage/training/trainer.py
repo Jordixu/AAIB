@@ -15,15 +15,24 @@ from torch.utils.data import DataLoader
 log = logging.getLogger(__name__)
 
 from kvasir_triage.eval.metrics import compute_metrics, per_subclass_recall
+from kvasir_triage.eval.suspicious_report import save_suspicious_frame_report
 from kvasir_triage.training.checkpoint import save_best_and_last
 from kvasir_triage.training.conditional_loss import ConditionalLoss
 from kvasir_triage.training.early_stop import EarlyStopping
 from kvasir_triage.training.optim import make_optimizer, make_scheduler
 
 
+def _meta_scalar(value):
+    if isinstance(value, torch.Tensor):
+        return value.item() if value.ndim == 0 else value.detach().cpu().tolist()
+    if isinstance(value, np.generic):
+        return value.item()
+    return value
+
+
 def _collect_val_outputs(model, loader, device):
     model.eval()
-    all_logits, all_labels, all_subclasses = [], [], []
+    all_logits, all_labels, all_subclasses, all_metas = [], [], [], []
     with torch.no_grad():
         for imgs, labels, meta in loader:
             imgs = imgs.to(device, non_blocking=True)
@@ -32,10 +41,17 @@ def _collect_val_outputs(model, loader, device):
             all_logits.append(logits.cpu())
             all_labels.append(labels)
             all_subclasses.extend(meta["subclass"])
+            batch_size = len(labels)
+            for idx in range(batch_size):
+                all_metas.append({
+                    key: _meta_scalar(values[idx])
+                    for key, values in meta.items()
+                })
     return (
         torch.cat(all_logits).numpy(),
         torch.cat(all_labels).numpy(),
         all_subclasses,
+        all_metas,
     )
 
 
@@ -128,7 +144,7 @@ def train(
         samples_per_sec = n_samples / train_time
 
         # validation
-        logits_np, labels_np, subclasses = _collect_val_outputs(model, val_loader, device)
+        logits_np, labels_np, subclasses, val_metas = _collect_val_outputs(model, val_loader, device)
         metrics = compute_metrics(logits_np, labels_np)
         subclass_recall = per_subclass_recall(logits_np, labels_np, subclasses)
 
@@ -156,7 +172,19 @@ def train(
                 logits=logits_np,
                 labels=labels_np,
                 subclasses=np.array(subclasses),
+                rel_paths=np.array([m.get("rel_path", "") for m in val_metas]),
+                original_paths=np.array([m.get("path", "") for m in val_metas]),
+                filenames=np.array([m.get("filename", "") for m in val_metas]),
+                stems=np.array([m.get("stem", "") for m in val_metas]),
             )
+            report_paths = save_suspicious_frame_report(
+                logits_np,
+                labels_np,
+                val_metas,
+                run_dir,
+                threshold=cfg.get("suspicious_report_threshold", 0.5),
+            )
+            log.info("Suspicious-frame report saved: %s", report_paths)
 
         log_entry = {
             "epoch": epoch,
