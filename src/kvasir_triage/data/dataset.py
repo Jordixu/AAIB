@@ -13,6 +13,23 @@ from torch.utils.data import Dataset
 from kvasir_triage.paths import outputs_root
 
 
+def _meta_from_row(row) -> dict[str, Any]:
+    keys = [
+        "subclass",
+        "rel_path",
+        "path",
+        "filename",
+        "stem",
+        "shard_rel_path",
+        "local_idx",
+        "bbox_norm_area",
+    ]
+    meta = {key: row.get(key, "") for key in keys}
+    meta["fold"] = int(row["fold"])
+    meta["local_idx"] = int(row["local_idx"])
+    return meta
+
+
 def _shard_rel_to_abs(rel: str) -> Path:
     """Resolve a manifest shard_rel_path to an absolute path via outputs_root."""
     return outputs_root() / rel
@@ -54,11 +71,7 @@ class KvasirNPZShardDataset(Dataset):
         local_idx = int(row["local_idx"])
         img = shard["images"][local_idx]  # uint8 HWC
         label = int(row["binary_label"])
-        meta = {
-            "subclass": row["subclass"],
-            "rel_path": row.get("rel_path", ""),
-            "fold": int(row["fold"]),
-        }
+        meta = _meta_from_row(row)
         if self.transform:
             img = self.transform(img)
         return img, label, meta
@@ -106,11 +119,8 @@ class KvasirInMemoryDataset(Dataset):
         row = self.manifest.iloc[idx]
         img = self._images[idx]
         label = int(self._labels[idx])
-        meta = {
-            "subclass": str(self._subclasses[idx]),
-            "rel_path": row.get("rel_path", ""),
-            "fold": int(row["fold"]),
-        }
+        meta = _meta_from_row(row)
+        meta["subclass"] = str(self._subclasses[idx])
         if self.transform:
             img = self.transform(img)
         return img, label, meta

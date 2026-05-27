@@ -1,6 +1,7 @@
 """Label definitions and binary mapping."""
 
 DIR_NAME_MAP: dict[str, str] = {
+    "Ampulla of vater": "Ampulla of Vater",
     "ampulla_of_vater": "Ampulla of Vater",
     "angiectasia": "Angiectasia",
     "blood_fresh": "Blood - fresh",
