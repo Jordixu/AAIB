@@ -13,7 +13,7 @@ from kvasir_triage.models.tiny import build_tiny
 
 _BUILDERS = {
     "densenet161_pretrained": lambda cfg: build_densenet161(
-        pretrained=True,
+        pretrained=cfg.get("pretrained", True),
         drop_first_downsampling=cfg.get("drop_first_downsampling", True),
         dropout=cfg.get("dropout", 0.0),
     ),

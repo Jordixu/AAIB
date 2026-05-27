@@ -13,6 +13,7 @@ from PIL import Image
 try:
     from pytorch_grad_cam import GradCAM
     from pytorch_grad_cam.utils.image import show_cam_on_image
+    from pytorch_grad_cam.utils.model_targets import BinaryClassifierOutputTarget
     _GRADCAM_AVAILABLE = True
 except ImportError:
     _GRADCAM_AVAILABLE = False
@@ -49,6 +50,14 @@ def compute_activation_mass(
     return float((heatmap * bbox_mask).sum() / heatmap.sum())
 
 
+def _denormalize_image(img: torch.Tensor, mean: list[float], std: list[float]) -> np.ndarray:
+    """Convert a normalized CHW tensor back to RGB float HWC in [0, 1]."""
+    mean_arr = np.array(mean, dtype=np.float32).reshape(1, 1, 3)
+    std_arr = np.array(std, dtype=np.float32).reshape(1, 1, 3)
+    img_np = img.detach().cpu().permute(1, 2, 0).numpy()
+    return np.clip((img_np * std_arr) + mean_arr, 0.0, 1.0)
+
+
 def run_gradcam_audit(
     model: nn.Module,
     model_name: str,
@@ -56,6 +65,9 @@ def run_gradcam_audit(
     out_dir: Path,
     device: torch.device,
     max_samples: int = 200,
+    mean: list[float] | None = None,
+    std: list[float] | None = None,
+    threshold: float = 0.5,
 ) -> Path:
     """Run Grad-CAM on True Positives with bboxes. Saves CSV + thumbnails."""
     if not _GRADCAM_AVAILABLE:
@@ -70,6 +82,9 @@ def run_gradcam_audit(
 
     rows: list[dict[str, Any]] = []
     n = 0
+    mean = mean or [0.0, 0.0, 0.0]
+    std = std or [1.0, 1.0, 1.0]
+    targets = [BinaryClassifierOutputTarget(1)]
 
     for imgs, labels, meta in loader:
         if n >= max_samples:
@@ -78,7 +93,7 @@ def run_gradcam_audit(
         with torch.no_grad():
             logits = model(imgs_dev).squeeze(1)
         probs = torch.sigmoid(logits).cpu().numpy()
-        preds = (probs >= 0.5).astype(int)
+        preds = (probs >= threshold).astype(int)
 
         for i in range(len(imgs)):
             lbl = int(labels[i])
@@ -87,7 +102,7 @@ def run_gradcam_audit(
                 continue  # only True Positives
 
             inp = imgs[i:i+1].to(device)
-            heatmap = cam(input_tensor=inp)[0]  # (H, W)
+            heatmap = cam(input_tensor=inp, targets=targets)[0]  # (H, W)
 
             mass = None  # bbox masks not available at this stage
 
@@ -100,17 +115,17 @@ def run_gradcam_audit(
             rows.append(row)
 
             # save thumbnail
-            img_np = (imgs[i].permute(1, 2, 0).numpy() * 255).clip(0, 255).astype(np.uint8)
-            vis = show_cam_on_image(img_np / 255.0, heatmap, use_rgb=True)
+            img_np = _denormalize_image(imgs[i], mean, std)
+            vis = show_cam_on_image(img_np.astype(np.float32), heatmap, use_rgb=True)
             fname = thumb_dir / f"tp_{n:04d}.jpg"
             Image.fromarray(vis).save(fname)
             n += 1
 
     csv_path = out_dir / "activation_mass.csv"
-    if rows:
-        with open(csv_path, "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
-            writer.writeheader()
-            writer.writerows(rows)
+    fieldnames = ["subclass", "rel_path", "prob", "activation_mass"]
+    with open(csv_path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
 
     return csv_path
