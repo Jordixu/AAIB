@@ -5,3 +5,5 @@ dropout: 0.2
 
 batch_size: 32
 lr: 3.0e-4
+freeze_epochs: 7
+backbone_lr: 1.0e-5

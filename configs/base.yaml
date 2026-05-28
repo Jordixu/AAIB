@@ -36,6 +36,10 @@ drop_first_downsampling: true
 dropout: 0.0
 pretrained: true
 
+# transfer learning
+freeze_epochs: 0
+backbone_lr: null
+
 # eval
 target_npv: 0.95
 

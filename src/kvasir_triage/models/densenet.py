@@ -14,6 +14,27 @@ def _remove_first_downsampling(features: nn.Module) -> None:
     features.pool0 = nn.Identity()
 
 
+def get_param_groups(
+    model: nn.Module,
+    backbone_lr: float,
+    head_lr: float,
+) -> list[dict]:
+    return [
+        {"params": model.features.parameters(), "lr": backbone_lr},
+        {"params": model.classifier.parameters(), "lr": head_lr},
+    ]
+
+
+def freeze_backbone(model: nn.Module) -> None:
+    for param in model.features.parameters():
+        param.requires_grad = False
+
+
+def unfreeze_backbone(model: nn.Module) -> None:
+    for param in model.features.parameters():
+        param.requires_grad = True
+
+
 def build_densenet161(
     pretrained: bool = True,
     drop_first_downsampling: bool = True,

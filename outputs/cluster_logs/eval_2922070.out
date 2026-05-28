@@ -1,0 +1,8 @@
+20:28:11  INFO     Log: /data/upfaabi/u231612/AAIB/outputs/logs/evaluate_20260528_202811.log
+20:28:37  INFO     PR-AUC:  0.3411
+20:28:37  INFO     MCC:     0.3420
+20:28:37  INFO     NPV:     0.9782
+20:28:37  INFO     t_safe:  0.99
+20:28:37  INFO     Speed:   1771.4 img/s  (0.56 ms/img)
+20:28:37  INFO     Predictions saved: outputs/runs/effb0_twophase_fold1/eval_predictions_val.csv
+20:28:37  INFO     Prediction arrays saved: outputs/runs/effb0_twophase_fold1/eval_predictions_val.npz

@@ -16,6 +16,27 @@ def _replace_head(model: nn.Module, in_features: int, dropout: float) -> nn.Modu
     return model
 
 
+def get_param_groups(
+    model: nn.Module,
+    backbone_lr: float,
+    head_lr: float,
+) -> list[dict]:
+    return [
+        {"params": model.features.parameters(), "lr": backbone_lr},
+        {"params": model.classifier.parameters(), "lr": head_lr},
+    ]
+
+
+def freeze_backbone(model: nn.Module) -> None:
+    for param in model.features.parameters():
+        param.requires_grad = False
+
+
+def unfreeze_backbone(model: nn.Module) -> None:
+    for param in model.features.parameters():
+        param.requires_grad = True
+
+
 def build_efficientnet_b0(pretrained: bool = True, dropout: float = 0.2) -> nn.Module:
     weights = EfficientNet_B0_Weights.IMAGENET1K_V1 if pretrained else None
     return _replace_head(efficientnet_b0(weights=weights), 1280, dropout)

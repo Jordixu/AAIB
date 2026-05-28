@@ -1,0 +1,3 @@
+19:56:10  INFO     Log: /Users/jaumemalenacortes/Desktop/AABI/AAIB/outputs/logs/train_20260528_195610.log
+19:56:11  INFO     Done. Best PR-AUC: -inf  (0 epochs)
+19:56:11  INFO     Run dir: /Users/jaumemalenacortes/Desktop/AABI/AAIB/outputs/runs/verify_max_epochs0

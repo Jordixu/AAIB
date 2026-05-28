@@ -3,9 +3,14 @@ import torch
 import torch.nn as nn
 
 
-def make_optimizer(model: nn.Module, cfg: dict) -> torch.optim.Optimizer:
+def make_optimizer(
+    model: nn.Module,
+    cfg: dict,
+    param_groups: list[dict] | None = None,
+) -> torch.optim.Optimizer:
+    params = param_groups if param_groups is not None else model.parameters()
     return torch.optim.AdamW(
-        model.parameters(),
+        params,
         lr=cfg.get("lr", 3e-4),
         weight_decay=cfg.get("weight_decay", 1e-4),
     )

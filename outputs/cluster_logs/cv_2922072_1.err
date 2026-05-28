@@ -1,0 +1,2 @@
+/data/upfaabi/u231612/AAIB/.venv/lib/python3.11/site-packages/albumentations/check_version.py:147: UserWarning: Error fetching version info <urlopen error [Errno 101] Network is unreachable>
+  data = fetch_version_info()
