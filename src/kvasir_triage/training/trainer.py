@@ -16,8 +16,8 @@ log = logging.getLogger(__name__)
 
 from kvasir_triage.eval.metrics import compute_metrics, per_subclass_recall
 from kvasir_triage.eval.suspicious_report import save_suspicious_frame_report
+from kvasir_triage.losses.focal import BinaryFocalLoss
 from kvasir_triage.training.checkpoint import save_best_and_last
-from kvasir_triage.training.conditional_loss import ConditionalLoss
 from kvasir_triage.training.early_stop import EarlyStopping
 from kvasir_triage.training.optim import make_optimizer, make_scheduler
 
@@ -68,7 +68,11 @@ def train(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
 
-    criterion = ConditionalLoss(cfg)
+    criterion = BinaryFocalLoss(
+        gamma=cfg.get("focal_gamma", 2.0),
+        alpha=cfg.get("focal_alpha", 0.25),
+    )
+    loss_name = "focal"
     optimizer = make_optimizer(model, cfg)
     scheduler = make_scheduler(optimizer, cfg)
     scaler = GradScaler(enabled=device.type == "cuda")
@@ -128,7 +132,7 @@ def train(
                     "loss": loss.item(),
                     "grad_norm": float(grad_norm),
                     "lr": optimizer.param_groups[0]["lr"],
-                    "loss_fn": criterion.name,
+                    "loss_fn": loss_name,
                 })
 
             if (batch_idx + 1) % log_interval == 0 or (batch_idx + 1) == n_batches:
@@ -150,8 +154,6 @@ def train(
 
         val_prauc = metrics["pr_auc"]
         scheduler.step(val_prauc)
-
-        switched = criterion.maybe_switch(subclass_recall)
 
         is_best = val_prauc > best_metric
         if is_best:
@@ -194,8 +196,7 @@ def train(
             "val_npv": metrics.get("npv", None),
             "train_time_s": train_time,
             "samples_per_sec": samples_per_sec,
-            "loss_fn": criterion.name,
-            "loss_switched": switched,
+            "loss_fn": loss_name,
             **{f"recall_{k}": v for k, v in subclass_recall.items()},
         }
         for lg in loggers:
@@ -203,11 +204,11 @@ def train(
 
         log.info(
             "Epoch %d done  train_loss=%.4f  val_pr_auc=%.4f  val_mcc=%.4f"
-            "  time=%.1fs  %.1f smp/s%s%s",
+            "  time=%.1fs  %.1f smp/s%s  loss_fn=%s",
             epoch, train_loss, val_prauc, metrics["mcc"],
             train_time, samples_per_sec,
             "  [best]" if is_best else "",
-            f"  [loss→{criterion.name}]" if switched else "",
+            loss_name,
         )
 
         if stopper.step(val_prauc):

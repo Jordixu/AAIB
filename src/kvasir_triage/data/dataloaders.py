@@ -21,7 +21,8 @@ def make_dataloaders(
     cfg keys used:
       in_memory (bool), batch_size (int), num_workers (int),
       persistent_workers (bool), lru_size (int, shard mode only),
-      pin_memory (bool).
+      pin_memory (bool), sampler_balance ("subclass" | "binary" | "none"),
+      sampler_weight_power (float), sampler_num_samples_multiplier (float).
     """
     norm_stats = load_json(norm_stats_path())
 
@@ -40,7 +41,26 @@ def make_dataloaders(
     train_ds = DatasetCls(train_df, transform=train_tf, **ds_kwargs)
     val_ds = DatasetCls(val_df, transform=eval_tf, **ds_kwargs)
 
-    sampler = make_weighted_sampler(train_df["binary_label"].tolist())
+    sampler_balance = cfg.get("sampler_balance", "subclass")
+    if sampler_balance == "subclass":
+        sampler = make_weighted_sampler(
+            train_df["subclass"].tolist(),
+            weight_power=cfg.get("sampler_weight_power", 1.0),
+            num_samples_multiplier=cfg.get("sampler_num_samples_multiplier", 1.0),
+        )
+    elif sampler_balance == "binary":
+        sampler = make_weighted_sampler(
+            train_df["binary_label"].tolist(),
+            weight_power=cfg.get("sampler_weight_power", 1.0),
+            num_samples_multiplier=cfg.get("sampler_num_samples_multiplier", 1.0),
+        )
+    elif sampler_balance in {None, "none"}:
+        sampler = None
+    else:
+        raise ValueError(
+            "sampler_balance must be one of: 'subclass', 'binary', 'none'. "
+            f"Got {sampler_balance!r}."
+        )
 
     num_workers = cfg.get("num_workers", 4)
     persistent = cfg.get("persistent_workers", True) and num_workers > 0
@@ -49,6 +69,7 @@ def make_dataloaders(
         train_ds,
         batch_size=cfg.get("batch_size", 32),
         sampler=sampler,
+        shuffle=sampler is None,
         num_workers=num_workers,
         persistent_workers=persistent,
         pin_memory=cfg.get("pin_memory", True),

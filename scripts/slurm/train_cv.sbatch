@@ -10,6 +10,7 @@
 
 # Array job: fold 0 and fold 1 run in parallel on separate GPU nodes.
 # Usage: sbatch --export=CONFIG=configs/densenet161_pretrained.yaml scripts/slurm/train_cv.sbatch
+# Optional: --export=CONFIG=configs/smoke.yaml,MAX_EPOCHS=2,MAX_BATCHES=5
 # Requires: bash scripts/slurm/setup_cluster.sh run once beforehand.
 
 set -euo pipefail
@@ -28,5 +29,12 @@ export TORCH_HOME="$SLURM_SUBMIT_DIR/weights"
 
 FOLD=$SLURM_ARRAY_TASK_ID
 CONFIG="${CONFIG:-configs/densenet161_pretrained.yaml}"
+EXTRA_ARGS=()
+if [[ -n "${MAX_EPOCHS:-}" ]]; then
+  EXTRA_ARGS+=(--max-epochs "$MAX_EPOCHS")
+fi
+if [[ -n "${MAX_BATCHES:-}" ]]; then
+  EXTRA_ARGS+=(--max-batches "$MAX_BATCHES")
+fi
 
-python scripts/train.py --config "$CONFIG" --fold "$FOLD"
+python scripts/train.py --config "$CONFIG" --fold "$FOLD" "${EXTRA_ARGS[@]}"

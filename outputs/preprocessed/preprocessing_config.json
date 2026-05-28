@@ -5,8 +5,8 @@
   "excluded_classes": [
     "Polyp",
     "Blood - fresh",
-    "Blood - hematin",
-    "Ampulla of Vater"
+    "Ampulla of Vater",
+    "Blood - hematin"
   ],
-  "bbox_source": "D:\\Git\\AAIB\\data\\metadata.csv"
+  "bbox_source": "/Users/jaumemalenacortes/Desktop/AABI/AAIB/data/metadata.csv"
 }

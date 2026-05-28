@@ -14,13 +14,13 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from kvasir_triage.data.transforms import AlbumentationsWrapper, build_eval_transform, build_train_transform
 from kvasir_triage.eval.metrics import compute_metrics
+from kvasir_triage.losses.focal import BinaryFocalLoss
 from kvasir_triage.models.tiny import build_tiny
 from kvasir_triage.log_setup import setup_logging
 from kvasir_triage.paths import logs_root, runs_root
 from kvasir_triage.seeding import set_all_seeds
 from kvasir_triage.tracking.jsonl_logger import JsonlLogger
 from kvasir_triage.training.checkpoint import save_best_and_last
-from kvasir_triage.training.conditional_loss import ConditionalLoss
 from kvasir_triage.training.early_stop import EarlyStopping
 from kvasir_triage.training.optim import make_optimizer, make_scheduler
 from kvasir_triage.utils import save_json
@@ -53,8 +53,14 @@ def run_smoke(epochs: int = 2, n_train: int = 160, n_val: int = 40, log=None) ->
     model = build_tiny()
     device = torch.device("cpu")
 
-    cfg = {"lr": 1e-3, "weight_decay": 0.0, "early_stop_patience": 999}
-    criterion = ConditionalLoss(cfg)
+    cfg = {
+        "lr": 1e-3,
+        "weight_decay": 0.0,
+        "early_stop_patience": 999,
+        "focal_gamma": 2.0,
+        "focal_alpha": 0.25,
+    }
+    criterion = BinaryFocalLoss(gamma=cfg["focal_gamma"], alpha=cfg["focal_alpha"])
     optimizer = make_optimizer(model, cfg)
     scheduler = make_scheduler(optimizer, cfg)
     logger = JsonlLogger(run_dir)

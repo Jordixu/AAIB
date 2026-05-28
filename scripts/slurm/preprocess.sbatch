@@ -23,4 +23,9 @@ source "$SLURM_SUBMIT_DIR/.venv/bin/activate"
 export PYTHONUNBUFFERED=1
 export ALBUMENTATIONS_NO_VERSION_CHECK=1
 
+if [[ "${CLEAN_PREPROCESSED:-0}" == "1" ]]; then
+  echo "Removing existing outputs/preprocessed before preprocessing ..."
+  rm -rf outputs/preprocessed
+fi
+
 python scripts/preprocess.py "$@"
