@@ -21,7 +21,9 @@ mkdir -p "$HOME/logs"
 
 module load conda
 conda activate aabi
-source "$SLURM_SUBMIT_DIR/.venv/bin/activate"
+if [[ -f "$SLURM_SUBMIT_DIR/.venv/bin/activate" ]]; then
+  source "$SLURM_SUBMIT_DIR/.venv/bin/activate"
+fi
 
 export PYTHONUNBUFFERED=1
 export ALBUMENTATIONS_NO_VERSION_CHECK=1
@@ -30,6 +32,9 @@ export TORCH_HOME="$SLURM_SUBMIT_DIR/weights"
 FOLD=$SLURM_ARRAY_TASK_ID
 CONFIG="${CONFIG:-configs/densenet161_pretrained.yaml}"
 EXTRA_ARGS=()
+if [[ -n "${RUN_ID:-}" ]]; then
+  EXTRA_ARGS+=(--run-id "${RUN_ID}_fold${FOLD}")
+fi
 if [[ -n "${MAX_EPOCHS:-}" ]]; then
   EXTRA_ARGS+=(--max-epochs "$MAX_EPOCHS")
 fi
