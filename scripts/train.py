@@ -64,10 +64,12 @@ def main():
     hw = snapshot_hardware()
     save_json(hw, run_dir / "hardware.json")
 
-    # load manifest - try new location, fall back to old
     mf = manifest_path()
     if not mf.exists():
-        mf = outputs_root().parent / "outputs_phase1_2_3" / "preprocessed_manifest.csv"
+        raise FileNotFoundError(
+            f"Manifest not found at {mf}. "
+            "Run preprocessing first: sbatch scripts/slurm/preprocess.sbatch"
+        )
     df = pd.read_csv(mf)
 
     train_loader, val_loader = make_dataloaders(df, args.fold, cfg)

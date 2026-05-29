@@ -20,7 +20,7 @@ from kvasir_triage.eval.metrics import compute_metrics, per_subclass_recall
 from kvasir_triage.eval.threshold import find_safe_threshold
 from kvasir_triage.models.registry import build_model
 from kvasir_triage.log_setup import setup_logging
-from kvasir_triage.paths import logs_root, manifest_path, outputs_root
+from kvasir_triage.paths import logs_root, manifest_path
 from kvasir_triage.training.checkpoint import load_checkpoint
 from kvasir_triage.utils import save_json
 
@@ -198,7 +198,10 @@ def main():
 
     mf = manifest_path()
     if not mf.exists():
-        mf = outputs_root().parent / "outputs_phase1_2_3" / "preprocessed_manifest.csv"
+        raise FileNotFoundError(
+            f"Manifest not found at {mf}. "
+            "Run preprocessing first: sbatch scripts/slurm/preprocess.sbatch"
+        )
     df = pd.read_csv(mf)
 
     eval_cfg = {**cfg}

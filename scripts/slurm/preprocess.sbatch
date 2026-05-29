@@ -8,6 +8,7 @@
 #SBATCH --time=04:00:00
 
 # CPU-only preprocessing on the standard partition.
+# Usage: sbatch --export=LABELLED_IMAGES=/path/to/labelled_images scripts/slurm/preprocess.sbatch
 # Requires: bash scripts/slurm/setup_cluster.sh run once beforehand.
 
 set -euo pipefail
@@ -30,4 +31,9 @@ if [[ "${CLEAN_PREPROCESSED:-0}" == "1" ]]; then
   rm -rf outputs/preprocessed
 fi
 
-python scripts/preprocess.py "$@"
+EXTRA_ARGS=()
+if [[ -n "${LABELLED_IMAGES:-}" ]]; then
+  EXTRA_ARGS+=(--labelled-images "${LABELLED_IMAGES}")
+fi
+
+python scripts/preprocess.py "${EXTRA_ARGS[@]}" "$@"

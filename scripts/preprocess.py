@@ -286,9 +286,18 @@ def main():
             shard_path = fold_shard_dir / shard_name
             rel_shard = f"preprocessed/shards/{split}/{shard_name}"
 
+            skip = False
             if args.skip_existing and shard_path.exists():
-                log.debug("  Skipping existing shard: %s", shard_name)
-            else:
+                existing = np.load(str(shard_path), allow_pickle=False)
+                if len(existing["images"]) == len(batch):
+                    skip = True
+                    log.debug("  Skipping existing shard: %s", shard_name)
+                else:
+                    log.warning(
+                        "  Shard %s exists but has %d images; batch has %d — re-writing.",
+                        shard_name, len(existing["images"]), len(batch),
+                    )
+            if not skip:
                 log.info("  Writing %s (%d images) ...", shard_name, len(batch))
                 write_npz_shard(batch, shard_path, mask, args.target_size)
 

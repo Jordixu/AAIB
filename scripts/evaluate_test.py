@@ -135,7 +135,10 @@ def evaluate_test(run_dirs: list[Path], log) -> dict:
 
     mf = manifest_path()
     if not mf.exists():
-        mf = outputs_root().parent / "outputs_phase1_2_3" / "preprocessed_manifest.csv"
+        raise FileNotFoundError(
+            f"Manifest not found at {mf}. "
+            "Run preprocessing first: sbatch scripts/slurm/preprocess.sbatch"
+        )
     df = add_split_column(pd.read_csv(mf))
     test_df = df[df["split"] == TEST_SPLIT].reset_index(drop=True)
 
