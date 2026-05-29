@@ -117,8 +117,8 @@ def _compute_norm_stats(manifest: pd.DataFrame, mask: np.ndarray, log) -> dict:
         )
 
     stats["note"] = (
-        "For train_fold=0 use fold_0 stats for the train transform and evaluate on fold_1. "
-        "For train_fold=1 use fold_1 stats for the train transform and evaluate on fold_0."
+        "Fold 0 is train, fold 1 is validation, and fold 2 is held-out test. "
+        "Use fold_0 stats for training/evaluation normalization."
     )
     return stats
 
@@ -134,9 +134,12 @@ def main():
                         help="Skip shards that already exist (default: True)")
     parser.add_argument("--no-norm-stats", action="store_true",
                         help="Skip normalization statistics computation")
-    parser.add_argument("--test-fraction", type=float, default=0.2,
+    parser.add_argument("--val-fraction", type=float, default=0.15,
+                        help="Fraction of each subclass's videos held out as validation (fold=1). "
+                             "Default: 0.15.")
+    parser.add_argument("--test-fraction", type=float, default=0.15,
                         help="Fraction of each subclass's videos held out as test (fold=2). "
-                             "Default: 0.2.")
+                             "Default: 0.15.")
     args = parser.parse_args()
 
     log = setup_logging("preprocess", logs_root())
@@ -181,13 +184,19 @@ def main():
 
     # Assign folds with subclass-stratified video-level splits
     log.info(
-        "Building subclass-stratified splits (test_fraction=%.2f, seed=%d) ...",
+        "Building subclass-stratified splits (val_fraction=%.2f, test_fraction=%.2f, seed=%d) ...",
+        args.val_fraction,
         args.test_fraction,
         args.seed,
     )
-    df = build_subclass_stratified_splits(df, test_fraction=args.test_fraction, seed=args.seed)
+    df = build_subclass_stratified_splits(
+        df,
+        val_fraction=args.val_fraction,
+        test_fraction=args.test_fraction,
+        seed=args.seed,
+    )
     log.info(
-        "Split: fold_0=%d  fold_1=%d  test=%d",
+        "Split: train=%d  val=%d  test=%d",
         (df["fold"] == 0).sum(),
         (df["fold"] == 1).sum(),
         (df["fold"] == 2).sum(),

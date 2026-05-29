@@ -14,17 +14,20 @@ def _norm_stats(fold_stats: dict) -> tuple[list, list]:
 
 
 def build_train_transform(mean: list[float], std: list[float]) -> A.Compose:
-    """Augmentation for training. No Hue shift, no ElasticTransform.
+    """Training augmentation with orientation, color, contrast, blur, and distortion.
 
-    RandomRotation uses fill=0 so the corner mask handles the black border
-    naturally - no additional correction needed.
+    Rotation/distortion use fill=0 so the corner mask handles black borders.
+    CLAHE boosts local contrast for subtle lesions; GridDistortion mimics bowel
+    wall deformation during capsule endoscopy.
     """
     return A.Compose([
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.5),
         A.Rotate(limit=360, border_mode=0, p=0.7),
-        A.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.0, p=0.5),
-        A.GaussianBlur(blur_limit=(3, 5), p=0.2),
+        A.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.05, p=0.5),
+        A.CLAHE(clip_limit=4.0, tile_grid_size=(8, 8), p=0.3),
+        A.GridDistortion(num_steps=5, distort_limit=0.3, border_mode=0, p=0.3),
+        A.GaussianBlur(blur_limit=(3, 7), p=0.2),
         A.Normalize(mean=mean, std=std),
         ToTensorV2(),
     ])
@@ -38,6 +41,24 @@ def build_eval_transform(mean: list[float], std: list[float]) -> A.Compose:
     ])
 
 
+def build_tta_transforms(mean: list[float], std: list[float]) -> list[A.Compose]:
+    """8 deterministic TTA variants: all combinations of h-flip, v-flip, transpose."""
+    norm = [A.Normalize(mean=mean, std=std), ToTensorV2()]
+    combos = []
+    for hflip in (False, True):
+        for vflip in (False, True):
+            for transpose in (False, True):
+                ops = []
+                if hflip:
+                    ops.append(A.HorizontalFlip(p=1.0))
+                if vflip:
+                    ops.append(A.VerticalFlip(p=1.0))
+                if transpose:
+                    ops.append(A.Transpose(p=1.0))
+                combos.append(A.Compose(ops + norm))
+    return combos
+
+
 def make_transforms_for_fold(
     norm_stats: dict,
     train_fold: int,
@@ -45,11 +66,20 @@ def make_transforms_for_fold(
     """Return (train_transform, eval_transform) for a given training fold.
 
     train_fold=0 means fold 0 is train (use fold_0 stats), fold 1 is val.
-    train_fold=1 means fold 1 is train (use fold_1 stats), fold 0 is val.
     """
     key = f"fold_{train_fold}"
     mean, std = _norm_stats(norm_stats[key])
     return build_train_transform(mean, std), build_eval_transform(mean, std)
+
+
+def make_tta_transforms_for_fold(
+    norm_stats: dict,
+    train_fold: int,
+) -> list[A.Compose]:
+    """Return deterministic TTA transforms using the training fold normalization."""
+    key = f"fold_{train_fold}"
+    mean, std = _norm_stats(norm_stats[key])
+    return build_tta_transforms(mean, std)
 
 
 class AlbumentationsWrapper:

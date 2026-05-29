@@ -65,8 +65,9 @@ def audit(manifest_path: Path, log=None) -> bool:
             _log("error", "FAIL: subclass '%s' absent from fold(s) %s", subclass, sorted(missing))
 
     # --- Summary counts ---
+    fold_labels = {0: "train", 1: "val", 2: "test"}
     for f in folds_present:
-        fold_label = "test" if f == 2 else f"fold_{f}"
+        fold_label = fold_labels.get(f, f"fold_{f}")
         n_imgs = (df["fold"] == f).sum()
         n_vids = len(fold_vids[f])
         _log("info", "%s: %d images, %d videos", fold_label, n_imgs, n_vids)

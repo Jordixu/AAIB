@@ -14,10 +14,11 @@ def infer_video_id(stem: str) -> str:
 
 def build_subclass_stratified_splits(
     image_df: pd.DataFrame,
-    test_fraction: float = 0.2,
+    val_fraction: float = 0.15,
+    test_fraction: float = 0.15,
     seed: int = 42,
 ) -> pd.DataFrame:
-    """Assign each image a fold: 0 (CV train A), 1 (CV train B), 2 (held-out test).
+    """Assign each image a fold: 0 (train), 1 (validation), 2 (held-out test).
 
     Video-level assignment using multi-label iterative stratification over the
     full set of subclasses present in each video — not just the primary subclass.
@@ -34,9 +35,14 @@ def build_subclass_stratified_splits(
     Parameters
     ----------
     image_df : DataFrame with columns: stem, subclass, binary_label
+    val_fraction : proportion reserved for validation (fold=1)
     test_fraction : proportion reserved for held-out test (fold=2)
     seed : integer seed for deterministic hash-based ordering
     """
+    train_fraction = 1.0 - val_fraction - test_fraction
+    if train_fraction <= 0:
+        raise ValueError("val_fraction + test_fraction must be < 1.0")
+
     df = image_df.copy()
     df["_vid"] = df["stem"].apply(infer_video_id)
 
@@ -51,7 +57,7 @@ def build_subclass_stratified_splits(
     vids = vid_sc.index.tolist()
     subclasses = vid_sc.columns.tolist()
 
-    target = {0: (1 - test_fraction) / 2, 1: (1 - test_fraction) / 2, 2: test_fraction}
+    target = {0: train_fraction, 1: val_fraction, 2: test_fraction}
 
     # n_vids_with_sc[sc] = number of videos that contain subclass sc
     n_vids_with_sc = vid_sc.sum(axis=0).to_dict()
@@ -77,7 +83,13 @@ def build_subclass_stratified_splits(
             key=_hash,
         )
         for vid in sc_vids:
-            best_fold = max(desired, key=lambda f: desired[f][sc])
+            present_folds = {
+                vid_fold[v]
+                for v in assigned
+                if vid_sc.loc[v, sc]
+            }
+            missing_folds = [f for f in target if f not in present_folds]
+            best_fold = max(missing_folds or desired, key=lambda f: desired[f][sc])
             vid_fold[vid] = best_fold
             assigned.add(vid)
             # Decrement desired for every subclass this video covers

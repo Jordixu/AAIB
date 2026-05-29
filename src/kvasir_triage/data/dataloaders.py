@@ -30,7 +30,7 @@ def make_dataloaders(
     train_tf = AlbumentationsWrapper(train_tf)
     eval_tf = AlbumentationsWrapper(eval_tf)
 
-    val_fold = 1 - train_fold
+    val_fold = 1
     train_df = manifest[manifest["fold"] == train_fold].reset_index(drop=True)
     val_df = manifest[manifest["fold"] == val_fold].reset_index(drop=True)
 

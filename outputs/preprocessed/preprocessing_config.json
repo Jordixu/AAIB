@@ -4,8 +4,8 @@
   "n_total": 46715,
   "excluded_classes": [
     "Polyp",
-    "Blood - fresh",
     "Ampulla of Vater",
+    "Blood - fresh",
     "Blood - hematin"
   ],
   "bbox_source": "/Users/jaumemalenacortes/Desktop/AABI/AAIB/data/metadata.csv"

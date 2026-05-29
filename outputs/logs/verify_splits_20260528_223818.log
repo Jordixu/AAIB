@@ -1,0 +1,20 @@
+22:38:18  INFO     Log: /Users/jaumemalenacortes/Desktop/AABI/AAIB/outputs/logs/verify_splits_20260528_223818.log
+22:38:19  INFO     Folds in manifest: [np.int64(0), np.int64(1), np.int64(2)]
+22:38:19  INFO     Leakage audit written to /Users/jaumemalenacortes/Desktop/AABI/AAIB/outputs/preprocessed/leakage_audit.csv
+22:38:19  INFO     train: 32787 images, 31 videos
+22:38:19  INFO     val: 8933 images, 6 videos
+22:38:19  INFO     test: 4995 images, 6 videos
+22:38:19  INFO     Subclass counts per fold:
+fold                      0     1     2
+subclass                               
+Angiectasia             193   652    21
+Erosion                 363   111    32
+Erythema                  9    27   123
+Foreign body            197   573     6
+Ileocecal valve        3185   383   621
+Lymphangiectasia         74   150   368
+Normal clean mucosa   25998  5148  3192
+Pylorus                1068   213   248
+Reduced mucosal view   1573  1094   239
+Ulcer                   127   582   145
+22:38:19  INFO     PASS: no leakage, all subclasses present in all folds.

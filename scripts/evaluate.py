@@ -15,6 +15,7 @@ from tqdm import tqdm
 
 from kvasir_triage.config import load_config
 from kvasir_triage.data.dataloaders import make_dataloaders
+from kvasir_triage.data.transforms import AlbumentationsWrapper, make_tta_transforms_for_fold
 from kvasir_triage.eval.metrics import compute_metrics, per_subclass_recall
 from kvasir_triage.eval.threshold import find_safe_threshold
 from kvasir_triage.models.registry import build_model
@@ -122,11 +123,34 @@ def _save_eval_predictions(
     return csv_path, npz_path
 
 
+def _run_eval_pass(model, loader, device, desc: str):
+    all_logits, all_labels, all_subclasses, all_metas = [], [], [], []
+    n = 0
+    with torch.no_grad():
+        for imgs, labels, meta in tqdm(loader, desc=desc):
+            imgs = imgs.to(device)
+            with autocast(device_type=device.type, enabled=device.type == "cuda"):
+                logits = model(imgs)
+            all_logits.append(logits.cpu().numpy())
+            all_labels.append(labels.numpy())
+            all_subclasses.extend(meta["subclass"])
+            all_metas.extend(_batched_meta_to_rows(meta, len(labels)))
+            n += len(imgs)
+    return (
+        np.concatenate(all_logits),
+        np.concatenate(all_labels),
+        all_subclasses,
+        all_metas,
+        n,
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("run_dir", type=Path)
     parser.add_argument("--fold", type=int, default=None)
     parser.add_argument("--split", choices=["val", "train"], default="val")
+    parser.add_argument("--tta", action="store_true", help="Average logits over deterministic TTA variants.")
     args = parser.parse_args()
 
     run_dir = args.run_dir
@@ -182,24 +206,47 @@ def main():
     else:
         eval_loader = val_loader
 
-    all_logits, all_labels, all_subclasses, all_metas = [], [], [], []
     t0 = time.perf_counter()
-    n = 0
-    with torch.no_grad():
-        for imgs, labels, meta in tqdm(eval_loader, desc=f"Evaluating {args.split}"):
-            imgs = imgs.to(device)
-            with autocast(device_type=device.type, enabled=device.type == "cuda"):
-                logits = model(imgs)
-            all_logits.append(logits.cpu().numpy())
-            all_labels.append(labels.numpy())
-            all_subclasses.extend(meta["subclass"])
-            all_metas.extend(_batched_meta_to_rows(meta, len(labels)))
-            n += len(imgs)
+    if args.tta:
+        from kvasir_triage.utils import load_json
+        from kvasir_triage.paths import norm_stats_path
+
+        tta_transforms = make_tta_transforms_for_fold(load_json(norm_stats_path()), fold)
+        log.info("TTA active: averaging logits over %d deterministic variants", len(tta_transforms))
+        logits_runs = []
+        labels_np = None
+        all_subclasses = None
+        all_metas = None
+        n = 0
+        original_transform = eval_loader.dataset.transform
+        try:
+            for idx, tta_tf in enumerate(tta_transforms):
+                eval_loader.dataset.transform = AlbumentationsWrapper(tta_tf)
+                raw_logits_np, labels_i, subclasses_i, metas_i, n_i = _run_eval_pass(
+                    model,
+                    eval_loader,
+                    device,
+                    desc=f"Evaluating {args.split} TTA {idx + 1}/{len(tta_transforms)}",
+                )
+                logits_runs.append(raw_logits_np)
+                if labels_np is None:
+                    labels_np = labels_i
+                    all_subclasses = subclasses_i
+                    all_metas = metas_i
+                    n = n_i
+        finally:
+            eval_loader.dataset.transform = original_transform
+        raw_logits_np = np.mean(np.stack(logits_runs, axis=0), axis=0)
+    else:
+        raw_logits_np, labels_np, all_subclasses, all_metas, n = _run_eval_pass(
+            model,
+            eval_loader,
+            device,
+            desc=f"Evaluating {args.split}",
+        )
 
     elapsed = time.perf_counter() - t0
-    raw_logits_np = np.concatenate(all_logits)
     logits_np = raw_logits_np.squeeze(1) if raw_logits_np.ndim == 2 and raw_logits_np.shape[1] == 1 else raw_logits_np
-    labels_np = np.concatenate(all_labels)
 
     metrics = compute_metrics(logits_np, labels_np)
     subclass_recall = per_subclass_recall(logits_np, labels_np, all_subclasses)
