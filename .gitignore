@@ -7,8 +7,11 @@ build/
 
 # outputs - keep structure, ignore data
 outputs/preprocessed/shards/
+outputs/preprocessed/*.npy
 outputs/runs/
 outputs/cv_summary/
+outputs/cluster_logs/
+outputs/logs/
 outputs/eda/*.png
 outputs/io_benchmark.csv
 *.npz
@@ -25,6 +28,7 @@ extra/
 env/
 venv/
 .venv/
+condaenv.*.requirements.txt
 
 # wandb
 wandb/
@@ -37,6 +41,7 @@ wandb/
 # OS
 .DS_Store
 Thumbs.db
+*.icloud
 
 #original repo
 data/kvasir-capsule/

@@ -18,7 +18,9 @@ mkdir -p "$HOME/logs"
 
 module load conda
 conda activate aabi
-source "$SLURM_SUBMIT_DIR/.venv/bin/activate"
+if [[ -f "$SLURM_SUBMIT_DIR/.venv/bin/activate" ]]; then
+  source "$SLURM_SUBMIT_DIR/.venv/bin/activate"
+fi
 
 export PYTHONUNBUFFERED=1
 export ALBUMENTATIONS_NO_VERSION_CHECK=1

@@ -14,6 +14,7 @@ from torch.utils.data import DataLoader
 from kvasir_triage.config import load_config
 from kvasir_triage.data.dataset import KvasirNPZShardDataset
 from kvasir_triage.data.dataloaders import make_dataloaders
+from kvasir_triage.data.splits import VAL_SPLIT, add_split_column
 from kvasir_triage.data.transforms import AlbumentationsWrapper, make_transforms_for_fold
 from kvasir_triage.eval.gradcam import run_gradcam_audit
 from kvasir_triage.models.registry import build_model
@@ -30,10 +31,12 @@ def _validate_shards_available(df: pd.DataFrame, train_fold: int) -> None:
     if missing_cols:
         raise RuntimeError(f"Manifest is missing required columns: {missing_cols}")
 
-    val_fold = 1 - train_fold
-    val_df = df[df["fold"] == val_fold]
+    if int(train_fold) != 0:
+        raise RuntimeError("Only fold 0 / split='train' is valid for trained models.")
+    df = add_split_column(df)
+    val_df = df[df["split"] == VAL_SPLIT]
     if val_df.empty:
-        raise RuntimeError(f"No validation rows found for fold {val_fold}.")
+        raise RuntimeError("No validation rows found for split='val' / fold=1.")
 
     missing = []
     for rel in val_df["shard_rel_path"].drop_duplicates():
@@ -90,7 +93,7 @@ def main():
     mf = manifest_path()
     if not mf.exists():
         mf = outputs_root().parent / "outputs_phase1_2_3" / "preprocessed_manifest.csv"
-    df = pd.read_csv(mf)
+    df = add_split_column(pd.read_csv(mf))
     if args.subclass:
         df = df[df["subclass"] == args.subclass].reset_index(drop=True)
         if df.empty:
@@ -99,16 +102,20 @@ def main():
 
     norm_stats = load_json(norm_stats_path())
     train_fold = cfg.get("fold", 0)
-    mean = norm_stats[f"fold_{train_fold}"]["mean"]
-    std = norm_stats[f"fold_{train_fold}"]["std"]
+    if int(train_fold) != 0:
+        raise RuntimeError("Only fold 0 / split='train' is valid for Grad-CAM.")
+    train_stats = norm_stats.get("train", norm_stats.get("fold_0"))
+    if train_stats is None:
+        raise KeyError("normalization_stats.json must contain 'train' or legacy 'fold_0' stats.")
+    mean = train_stats["mean"]
+    std = train_stats["std"]
 
     if args.val_index is not None:
-        val_fold = 1 - train_fold
-        val_df = df[df["fold"] == val_fold].reset_index(drop=True)
+        val_df = df[df["split"] == VAL_SPLIT].reset_index(drop=True)
         if args.val_index < 0 or args.val_index >= len(val_df):
             raise RuntimeError(
-                f"--val-index {args.val_index} is out of range for validation fold "
-                f"{val_fold} with {len(val_df)} rows."
+                f"--val-index {args.val_index} is out of range for validation split "
+                f"with {len(val_df)} rows."
             )
         _, eval_tf = make_transforms_for_fold(norm_stats, train_fold)
         val_ds = KvasirNPZShardDataset(

@@ -1,13 +1,12 @@
-"""Assemble a cv_summary directory from two independently trained fold run dirs.
+"""Assemble a summary directory from trained run dirs.
 
-Use this after training with the SLURM array job (train_cv.sbatch), which trains
-each fold independently and does not produce a cv_summary automatically.
+The current data split is fixed train/val/test, so the common case is one
+fold0/train run. Multiple run dirs are still accepted for seed/model ensembles.
 
 Usage:
     python scripts/build_cv_summary.py \\
         outputs/runs/myrun_fold0 \\
-        outputs/runs/myrun_fold1 \\
-        --cv-id myrun_cv
+        --cv-id myrun_holdout
 """
 import argparse
 import json
@@ -23,8 +22,8 @@ from kvasir_triage.utils import save_json
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("run_dirs", nargs=2, type=Path, metavar="RUN_DIR",
-                        help="Path to fold 0 and fold 1 run directories")
+    parser.add_argument("run_dirs", nargs="+", type=Path, metavar="RUN_DIR",
+                        help="Path to one or more trained run directories")
     parser.add_argument("--cv-id", type=str, default=None,
                         help="Name for the cv_summary directory (default: derived from run dirs)")
     args = parser.parse_args()

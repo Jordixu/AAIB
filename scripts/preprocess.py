@@ -12,7 +12,7 @@ import pandas as pd
 from kvasir_triage.data.labels import BINARY_LABEL, DIR_NAME_MAP, EXCLUDED_CLASSES, is_excluded
 from kvasir_triage.data.masks import make_corner_polygon_mask
 from kvasir_triage.data.preprocess import SHARD_SIZE, TARGET_SIZE, write_npz_shard
-from kvasir_triage.data.splits import build_subclass_stratified_splits
+from kvasir_triage.data.splits import SPLIT_ID_TO_NAME, build_subclass_stratified_splits
 from kvasir_triage.log_setup import setup_logging
 from kvasir_triage.paths import logs_root, outputs_root, preprocessed_root, shards_root
 from kvasir_triage.seeding import set_all_seeds
@@ -86,11 +86,16 @@ def _compute_norm_stats(manifest: pd.DataFrame, mask: np.ndarray, log) -> dict:
     """Compute per-channel mean/std over mucosal region from written shards."""
     stats: dict = {}
     scopes = [
-        ("all", manifest[manifest["fold"] < 2]),
-        ("fold_0", manifest[manifest["fold"] == 0]),
-        ("fold_1", manifest[manifest["fold"] == 1]),
+        ("train", manifest[manifest["split"] == "train"]),
+        ("val", manifest[manifest["split"] == "val"]),
+        ("test", manifest[manifest["split"] == "test"]),
+        # Legacy keys retained so old notebooks/runs can still load stats.
+        ("fold_0", manifest[manifest["split"] == "train"]),
+        ("fold_1", manifest[manifest["split"] == "val"]),
     ]
     for scope_name, scope_df in scopes:
+        if scope_df.empty:
+            continue
         rel_paths = scope_df["shard_rel_path"].unique()
         sum_c = np.zeros(3, dtype=np.float64)
         sumsq_c = np.zeros(3, dtype=np.float64)
@@ -116,10 +121,7 @@ def _compute_norm_stats(manifest: pd.DataFrame, mask: np.ndarray, log) -> dict:
             scope_name, *mean, *std,
         )
 
-    stats["note"] = (
-        "For train_fold=0 use fold_0 stats for the train transform and evaluate on fold_1. "
-        "For train_fold=1 use fold_1 stats for the train transform and evaluate on fold_0."
-    )
+    stats["note"] = "Use train stats for all model normalization. Validation/test are never used for fitting."
     return stats
 
 
@@ -134,9 +136,18 @@ def main():
                         help="Skip shards that already exist (default: True)")
     parser.add_argument("--no-norm-stats", action="store_true",
                         help="Skip normalization statistics computation")
-    parser.add_argument("--test-fraction", type=float, default=0.2,
-                        help="Fraction of each subclass's videos held out as test (fold=2). "
-                             "Default: 0.2.")
+    parser.add_argument("--val-fraction", type=float, default=0.15,
+                        help="Fraction held out as validation split. "
+                             "Default: 0.15.")
+    parser.add_argument("--test-fraction", type=float, default=0.15,
+                        help="Fraction held out as test split. "
+                             "Default: 0.15.")
+    parser.add_argument("--rare-threshold", type=int, default=1000,
+                        help="Classes with fewer total images than this value get a "
+                             "boosted train fraction. Set to 0 to disable. Default: 1000.")
+    parser.add_argument("--rare-train-fraction", type=float, default=0.80,
+                        help="Train fraction applied to rare classes (those below "
+                             "--rare-threshold). Default: 0.80.")
     args = parser.parse_args()
 
     log = setup_logging("preprocess", logs_root())
@@ -181,49 +192,73 @@ def main():
 
     # Assign folds with subclass-stratified video-level splits
     log.info(
-        "Building subclass-stratified splits (test_fraction=%.2f, seed=%d) ...",
+        "Building subclass-stratified splits (val_fraction=%.2f, test_fraction=%.2f, seed=%d, "
+        "rare_threshold=%d, rare_train_fraction=%.2f) ...",
+        args.val_fraction,
         args.test_fraction,
         args.seed,
+        args.rare_threshold,
+        args.rare_train_fraction,
     )
-    df = build_subclass_stratified_splits(df, test_fraction=args.test_fraction, seed=args.seed)
+    df = build_subclass_stratified_splits(
+        df,
+        val_fraction=args.val_fraction,
+        test_fraction=args.test_fraction,
+        seed=args.seed,
+        rare_threshold=args.rare_threshold,
+        rare_train_fraction=args.rare_train_fraction,
+    )
     log.info(
-        "Split: fold_0=%d  fold_1=%d  test=%d",
-        (df["fold"] == 0).sum(),
-        (df["fold"] == 1).sum(),
-        (df["fold"] == 2).sum(),
+        "Split: train=%d  val=%d  test=%d",
+        (df["split"] == "train").sum(),
+        (df["split"] == "val").sum(),
+        (df["split"] == "test").sum(),
     )
     for sub, grp in df.groupby("subclass"):
-        counts = grp["fold"].value_counts().sort_index()
+        counts = grp["split"].value_counts()
         log.info(
-            "  %-30s  fold0=%d  fold1=%d  test=%d",
+            "  %-30s  train=%d  val=%d  test=%d",
             sub,
-            counts.get(0, 0),
-            counts.get(1, 0),
-            counts.get(2, 0),
+            counts.get("train", 0),
+            counts.get("val", 0),
+            counts.get("test", 0),
         )
 
     # --- Pre-shard distribution check ---
-    folds_present = sorted(df["fold"].unique())
-    subclass_fold_counts = df.groupby(["subclass", "fold"]).size().unstack(fill_value=0)
-    log.info("Subclass × fold distribution:\n%s", subclass_fold_counts.to_string())
+    splits_present = ["train", "val", "test"]
+    subclass_fold_counts = df.groupby(["subclass", "split"]).size().unstack(fill_value=0)
+    log.info("Subclass × split distribution:\n%s", subclass_fold_counts.to_string())
 
     missing_coverage = []
     for subclass in subclass_fold_counts.index:
-        for fold in folds_present:
-            if subclass_fold_counts.loc[subclass, fold] == 0:
-                missing_coverage.append((subclass, fold))
+        for split in splits_present:
+            if subclass_fold_counts.loc[subclass, split] == 0:
+                missing_coverage.append((subclass, split))
 
     if missing_coverage:
-        for subclass, fold in missing_coverage:
-            log.error("FAIL: subclass '%s' has 0 images in fold %d", subclass, fold)
+        for subclass, split in missing_coverage:
+            log.error("FAIL: subclass '%s' has 0 images in split '%s'", subclass, split)
         log.error(
-            "Aborting before shard creation: %d subclass/fold slot(s) are empty. "
+            "Aborting before shard creation: %d subclass/split slot(s) are empty. "
             "Re-run with a different --seed or inspect video distribution.",
             len(missing_coverage),
         )
         sys.exit(1)
 
-    log.info("Distribution check PASSED: all subclasses present in all folds.")
+    split_fracs = df["split"].value_counts(normalize=True)
+    expected = {"train": 1.0 - args.val_fraction - args.test_fraction, "val": args.val_fraction, "test": args.test_fraction}
+    for split, target in expected.items():
+        actual = float(split_fracs.get(split, 0.0))
+        if abs(actual - target) > 0.05:
+            log.warning(
+                "Split '%s' is %.2f%% of images, target %.2f%%. "
+                "Video-level grouping and subclass coverage can prevent exact ratios.",
+                split,
+                actual * 100,
+                target * 100,
+            )
+
+    log.info("Distribution check PASSED: all subclasses present in all splits.")
 
     # Build corner mask and save
     mask = make_corner_polygon_mask(args.target_size)
@@ -237,28 +272,39 @@ def main():
     shard_meta = []
     active_folds = [0, 1] + ([2] if (df["fold"] == 2).any() else [])
     for fold in active_folds:
+        split = SPLIT_ID_TO_NAME[fold]
         fold_df = df[df["fold"] == fold].reset_index(drop=True)
-        fold_shard_dir = shards_root() / f"fold_{fold}"
+        fold_shard_dir = shards_root() / split
         fold_shard_dir.mkdir(parents=True, exist_ok=True)
-        log.info("Writing fold %d (%d images) ...", fold, len(fold_df))
+        log.info("Writing split '%s' (%d images) ...", split, len(fold_df))
 
         rows_list = fold_df.to_dict("records")
         for i in range(0, len(rows_list), args.shard_size):
             shard_idx = i // args.shard_size
             batch = rows_list[i:i + args.shard_size]
-            shard_name = f"fold{fold}_shard_{shard_idx:04d}.npz"
+            shard_name = f"{split}_shard_{shard_idx:04d}.npz"
             shard_path = fold_shard_dir / shard_name
-            rel_shard = f"preprocessed/shards/fold_{fold}/{shard_name}"
+            rel_shard = f"preprocessed/shards/{split}/{shard_name}"
 
+            skip = False
             if args.skip_existing and shard_path.exists():
-                log.debug("  Skipping existing shard: %s", shard_name)
-            else:
+                existing = np.load(str(shard_path), allow_pickle=False)
+                if len(existing["images"]) == len(batch):
+                    skip = True
+                    log.debug("  Skipping existing shard: %s", shard_name)
+                else:
+                    log.warning(
+                        "  Shard %s exists but has %d images; batch has %d — re-writing.",
+                        shard_name, len(existing["images"]), len(batch),
+                    )
+            if not skip:
                 log.info("  Writing %s (%d images) ...", shard_name, len(batch))
                 write_npz_shard(batch, shard_path, mask, args.target_size)
 
             for j, row in enumerate(batch):
                 shard_meta.append({
                     "fold": fold,
+                    "split": split,
                     "shard_rel_path": rel_shard,
                     "local_idx": j,
                     "bbox_norm_area": row.get("bbox_norm_area"),
@@ -282,6 +328,7 @@ def main():
         "target_size": args.target_size,
         "shard_size": args.shard_size,
         "n_total": len(manifest_df),
+        "split_mapping": {"fold_0": "train", "fold_1": "val", "fold_2": "test"},
         "excluded_classes": list(EXCLUDED_CLASSES),
         "bbox_source": str(metadata_csv) if metadata_csv else None,
     }, preprocessed_root() / "preprocessing_config.json")

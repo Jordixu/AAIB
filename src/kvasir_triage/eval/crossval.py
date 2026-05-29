@@ -1,7 +1,6 @@
-"""Aggregate metrics across folds."""
+"""Aggregate metrics across one or more validation runs."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import numpy as np
@@ -10,7 +9,7 @@ from kvasir_triage.utils import load_json, save_json
 
 
 def aggregate_folds(fold_metrics: list[dict]) -> dict:
-    """Compute mean and std of each scalar metric across folds."""
+    """Compute mean and std of each scalar metric across runs."""
     keys = [k for k in fold_metrics[0] if isinstance(fold_metrics[0][k], (int, float))]
     agg: dict = {}
     for k in keys:

@@ -1,14 +1,14 @@
-"""Evaluate trained model(s) on the held-out test set (fold=2).
+"""Evaluate trained model(s) on the held-out test split.
 
 Run after training and evaluate.py (threshold calibration must exist).
-Uses the NPV-safe threshold calibrated on the validation fold - the test set
+Uses the NPV-safe threshold calibrated on the validation split - the test set
 is never used for calibration.
 
 Single model:
     python scripts/evaluate_test.py outputs/runs/myrun_fold0
 
-Ensemble (recommended):
-    python scripts/evaluate_test.py outputs/runs/myrun_fold0 outputs/runs/myrun_fold1
+Ensemble of independent runs/seeds:
+    python scripts/evaluate_test.py outputs/runs/run_a_fold0 outputs/runs/run_b_fold0
 
 Ensemble from CV summary:
     python scripts/evaluate_test.py --cv-summary outputs/cv_summary/myrun
@@ -28,6 +28,7 @@ from torch.amp import autocast
 from tqdm import tqdm
 
 from kvasir_triage.data.dataset import KvasirNPZShardDataset
+from kvasir_triage.data.splits import TEST_SPLIT, add_split_column
 from kvasir_triage.data.transforms import AlbumentationsWrapper, build_eval_transform
 from kvasir_triage.eval.metrics import compute_metrics, per_subclass_recall
 from kvasir_triage.log_setup import setup_logging
@@ -64,6 +65,11 @@ def _load_run(run_dir: Path, device: torch.device, norm_stats: dict) -> tuple:
 
     ckpt = load_checkpoint(ckpt_path)
     train_fold = cfg.get("fold", ckpt.get("cfg", {}).get("fold", 0))
+    if int(train_fold) != 0:
+        raise ValueError(
+            f"Refusing to load legacy fold={train_fold} as a trained model. "
+            "Only fold 0 / split='train' is valid; fold 1 is validation."
+        )
 
     model = build_model(cfg["model"], cfg)
     model.load_state_dict(ckpt["model"])
@@ -91,8 +97,9 @@ def _run_inference(
     num_workers: int,
 ) -> tuple[np.ndarray, np.ndarray, list[str]]:
     """Return (logits, labels, subclasses) for the test set."""
-    fold_key = f"fold_{train_fold}"
-    stats = norm_stats.get(fold_key, norm_stats.get("all"))
+    stats = norm_stats.get("train", norm_stats.get("fold_0"))
+    if stats is None:
+        raise KeyError("normalization_stats.json must contain 'train' or legacy 'fold_0' stats.")
     tf = AlbumentationsWrapper(build_eval_transform(stats["mean"], stats["std"]))
     ds = KvasirNPZShardDataset(test_df, transform=tf)
     loader = DataLoader(
@@ -128,14 +135,17 @@ def evaluate_test(run_dirs: list[Path], log) -> dict:
 
     mf = manifest_path()
     if not mf.exists():
-        mf = outputs_root().parent / "outputs_phase1_2_3" / "preprocessed_manifest.csv"
-    df = pd.read_csv(mf)
-    test_df = df[df["fold"] == 2].reset_index(drop=True)
+        raise FileNotFoundError(
+            f"Manifest not found at {mf}. "
+            "Run preprocessing first: sbatch scripts/slurm/preprocess.sbatch"
+        )
+    df = add_split_column(pd.read_csv(mf))
+    test_df = df[df["split"] == TEST_SPLIT].reset_index(drop=True)
 
     if len(test_df) == 0:
         raise ValueError(
-            "No fold=2 rows in manifest. "
-            "Re-run preprocess.py with --test-fraction 0.2 to create the test set."
+            "No split='test' / fold=2 rows in manifest. "
+            "Re-run preprocess.py with --test-fraction 0.15 to create the test set."
         )
     log.info("Test set: %d images from %d unique videos", len(test_df),
              test_df["stem"].str.split("_").str[0].nunique())
@@ -240,13 +250,13 @@ def _find_run_dirs_from_cv(cv_summary_dir: Path) -> list[Path]:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Evaluate on held-out test set (fold=2)")
+    parser = argparse.ArgumentParser(description="Evaluate on held-out test split")
     parser.add_argument("run_dirs", type=Path, nargs="*",
                         help="One or more run directories to ensemble")
     parser.add_argument("--cv-summary", type=Path, metavar="CV_DIR",
-                        help="CV summary directory to ensemble both fold models")
+                        help="Summary directory containing run dirs to evaluate/ensemble")
     parser.add_argument("--out", type=Path, default=None,
-                        help="Output path for test_results.json (default: outputs/test_evaluation/)")
+                        help="Output JSON path or output directory (default: outputs/test_evaluation/test_results.json)")
     args = parser.parse_args()
 
     log = setup_logging("evaluate_test", logs_root())
@@ -262,11 +272,12 @@ def main():
     result = evaluate_test(run_dirs, log)
 
     if args.out is None:
-        out_dir = outputs_root() / "test_evaluation"
+        out_path = outputs_root() / "test_evaluation" / "test_results.json"
+    elif args.out.suffix.lower() == ".json":
+        out_path = args.out
     else:
-        out_dir = args.out if args.out.is_dir() else args.out.parent
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "test_results.json"
+        out_path = args.out / "test_results.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     save_json(result, out_path)
     log.info("Results saved to %s", out_path)
 
