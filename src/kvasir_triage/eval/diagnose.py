@@ -1,7 +1,6 @@
 """Phase 7 path classifier: Path A (success), B (Clever Hans), C (data-bound)."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any
 

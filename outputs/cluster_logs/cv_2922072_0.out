@@ -1,3 +1,0 @@
-20:11:41  INFO     Log: /data/upfaabi/u231612/AAIB/outputs/logs/train_20260528_201141.log
-20:24:29  INFO     Done. Best PR-AUC: 0.6121  (12 epochs)
-20:24:29  INFO     Run dir: /data/upfaabi/u231612/AAIB/outputs/runs/effv2s_twophase_fold0

@@ -1,7 +1,6 @@
 """Aggregate metrics across one or more validation runs."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import numpy as np

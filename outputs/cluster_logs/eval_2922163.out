@@ -1,8 +1,0 @@
-23:15:50  INFO     Log: /data/upfaabi/u231612/AAIB/outputs/logs/evaluate_20260528_231550.log
-23:16:47  INFO     PR-AUC:  0.3177
-23:16:47  INFO     MCC:     0.1098
-23:16:47  INFO     NPV:     0.7832
-23:16:47  INFO     t_safe:  0.14195195195195195
-23:16:47  INFO     Speed:   334.1 img/s  (2.99 ms/img)
-23:16:47  INFO     Predictions saved: outputs/runs/effv2l_smoke_fold0/eval_predictions_val.csv
-23:16:47  INFO     Prediction arrays saved: outputs/runs/effv2l_smoke_fold0/eval_predictions_val.npz

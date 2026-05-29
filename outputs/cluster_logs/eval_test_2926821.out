@@ -1,4 +1,0 @@
-16:29:47  INFO     Log: /home/u231612/outputs/logs/evaluate_test_20260529_162946.log
-16:29:47  INFO     Device: cuda
-16:29:47  INFO     Test set: 6284 images from 17 unique videos
-16:29:47  INFO     Loading run: outputs/runs/mobilenet_v3_large_fold0_20260529_155337
