@@ -1,0 +1,4 @@
+16:29:02  INFO     Log: /home/u231612/outputs/logs/evaluate_test_20260529_162902.log
+16:29:02  INFO     Device: cuda
+16:29:03  INFO     Test set: 6284 images from 17 unique videos
+16:29:03  INFO     Loading run: outputs/runs/effv2s_twophase_fold0

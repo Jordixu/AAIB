@@ -256,7 +256,7 @@ def main():
     parser.add_argument("--cv-summary", type=Path, metavar="CV_DIR",
                         help="Summary directory containing run dirs to evaluate/ensemble")
     parser.add_argument("--out", type=Path, default=None,
-                        help="Output path for test_results.json (default: outputs/test_evaluation/)")
+                        help="Output JSON path or output directory (default: outputs/test_evaluation/test_results.json)")
     args = parser.parse_args()
 
     log = setup_logging("evaluate_test", logs_root())
@@ -272,11 +272,12 @@ def main():
     result = evaluate_test(run_dirs, log)
 
     if args.out is None:
-        out_dir = outputs_root() / "test_evaluation"
+        out_path = outputs_root() / "test_evaluation" / "test_results.json"
+    elif args.out.suffix.lower() == ".json":
+        out_path = args.out
     else:
-        out_dir = args.out if args.out.is_dir() else args.out.parent
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "test_results.json"
+        out_path = args.out / "test_results.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     save_json(result, out_path)
     log.info("Results saved to %s", out_path)
 

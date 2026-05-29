@@ -1,0 +1,12 @@
+10:48:47  INFO     Log: /data/upfaabi/u231612/AAIB/outputs/logs/evaluate_test_20260529_104847.log
+10:48:47  INFO     Device: cuda
+10:48:48  INFO     Test set: 4995 images from 6 unique videos
+10:48:48  INFO     Loading run: outputs/runs/effv2l_full_fold0
+10:49:35  INFO     Loading run: outputs/runs/effv2l_full_fold1
+10:50:04  INFO     === Test set results ===
+10:50:04  INFO     PR-AUC:  0.8118
+10:50:04  INFO     MCC:     0.6692
+10:50:04  INFO     NPV@0.5: 0.9267
+10:50:04  INFO     NPV@t_safe(0.990): 0.8676  (TP=39 FN=656)
+10:50:04  INFO     Subclass recall: {np.str_('Angiectasia'): 0.8571428571428571, np.str_('Erosion'): 0.8125, np.str_('Erythema'): 0.6422764227642277, np.str_('Foreign body'): 0.3333333333333333, np.str_('Lymphangiectasia'): 0.33152173913043476, np.str_('Ulcer'): 0.7517241379310344}
+10:50:04  INFO     Results saved to outputs/test_evaluation/test_results.json
