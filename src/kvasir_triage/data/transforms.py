@@ -13,6 +13,15 @@ def _norm_stats(fold_stats: dict) -> tuple[list, list]:
     return mean, std
 
 
+def _training_norm_stats(norm_stats: dict) -> dict:
+    """Return normalization stats computed only on the training split."""
+    if "train" in norm_stats:
+        return norm_stats["train"]
+    if "fold_0" in norm_stats:
+        return norm_stats["fold_0"]
+    raise KeyError("normalization_stats.json must contain 'train' or legacy 'fold_0' stats.")
+
+
 def build_train_transform(mean: list[float], std: list[float]) -> A.Compose:
     """Training augmentation with orientation, color, contrast, blur, and distortion.
 
@@ -63,12 +72,14 @@ def make_transforms_for_fold(
     norm_stats: dict,
     train_fold: int,
 ) -> tuple[A.Compose, A.Compose]:
-    """Return (train_transform, eval_transform) for a given training fold.
+    """Return (train_transform, eval_transform) using train-split statistics.
 
-    train_fold=0 means fold 0 is train (use fold_0 stats), fold 1 is val.
+    ``train_fold`` is a legacy argument. Only fold 0 is valid because the
+    manifest now represents a fixed train/val/test holdout, not cross-validation.
     """
-    key = f"fold_{train_fold}"
-    mean, std = _norm_stats(norm_stats[key])
+    if int(train_fold) != 0:
+        raise ValueError("Only fold 0 / split='train' can be used for training.")
+    mean, std = _norm_stats(_training_norm_stats(norm_stats))
     return build_train_transform(mean, std), build_eval_transform(mean, std)
 
 
@@ -76,9 +87,10 @@ def make_tta_transforms_for_fold(
     norm_stats: dict,
     train_fold: int,
 ) -> list[A.Compose]:
-    """Return deterministic TTA transforms using the training fold normalization."""
-    key = f"fold_{train_fold}"
-    mean, std = _norm_stats(norm_stats[key])
+    """Return deterministic TTA transforms using train-split normalization."""
+    if int(train_fold) != 0:
+        raise ValueError("Only fold 0 / split='train' can be used for evaluation.")
+    mean, std = _norm_stats(_training_norm_stats(norm_stats))
     return build_tta_transforms(mean, std)
 
 

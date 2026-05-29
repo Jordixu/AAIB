@@ -1,4 +1,4 @@
-"""Train one config on one fold."""
+"""Train one config on the fixed train split and validate on the val split."""
 import argparse
 import sys
 import time
@@ -26,7 +26,13 @@ from kvasir_triage.utils import save_json
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, type=Path)
-    parser.add_argument("--fold", type=int, required=True, choices=[0, 1])
+    parser.add_argument(
+        "--fold",
+        type=int,
+        default=0,
+        choices=[0],
+        help="Legacy alias for the training split. Only fold 0 / split='train' is valid.",
+    )
     parser.add_argument("--run-id", type=str, default=None)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--max-epochs", type=int, default=None)
@@ -35,6 +41,8 @@ def main():
 
     cfg = load_config(args.config)
     cfg["fold"] = args.fold
+    cfg["train_split"] = "train"
+    cfg["val_split"] = "val"
     if args.max_epochs is not None:
         cfg["max_epochs"] = args.max_epochs
     if args.max_batches is not None:
@@ -82,7 +90,10 @@ def main():
         resume_path=resume_path,
     )
 
-    save_json({**result, "run_id": run_id, "fold": args.fold}, run_dir / "train_result.json")
+    save_json(
+        {**result, "run_id": run_id, "fold": args.fold, "train_split": "train", "val_split": "val"},
+        run_dir / "train_result.json",
+    )
     wandb_log.finish()
     log.info("Done. Best PR-AUC: %.4f  (%d epochs)", result["best_pr_auc"], result["epochs_run"])
     log.info("Run dir: %s", run_dir)

@@ -7,9 +7,8 @@
 #SBATCH --mem=32G
 #SBATCH --time=01:00:00
 
-# Threshold calibration on a single validation fold.
+# Threshold calibration on the validation split.
 # Usage: sbatch scripts/slurm/evaluate.sbatch outputs/runs/myrun_fold0
-#        sbatch scripts/slurm/evaluate.sbatch outputs/runs/myrun_fold1
 # Requires: bash scripts/slurm/setup_cluster.sh run once beforehand.
 
 set -euo pipefail

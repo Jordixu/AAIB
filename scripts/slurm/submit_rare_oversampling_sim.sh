@@ -1,5 +1,5 @@
 #!/bin/bash
-# Submit a clean preprocessing job followed by a short two-fold training simulation.
+# Submit a clean preprocessing job followed by a short holdout training simulation.
 #
 # Usage:
 #   bash scripts/slurm/submit_rare_oversampling_sim.sh

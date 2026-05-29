@@ -26,6 +26,8 @@ def _get_target_layer(model: nn.Module, model_name: str) -> nn.Module:
     elif model_name.startswith("efficientnet"):
         # last MBConv block in EfficientNet-B0
         return model.features[-1]
+    elif model_name.startswith("mobilenet"):
+        return model.features[-1]
     elif model_name == "tiny":
         return model.features[-2]  # last ReLU
     raise ValueError(f"No Grad-CAM target layer known for model '{model_name}'")

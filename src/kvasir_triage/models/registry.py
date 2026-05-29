@@ -3,6 +3,7 @@ import torch.nn as nn
 
 from kvasir_triage.models import densenet as densenet_helpers
 from kvasir_triage.models import efficientnet as efficientnet_helpers
+from kvasir_triage.models import mobilenet as mobilenet_helpers
 from kvasir_triage.models.densenet import build_densenet161
 from kvasir_triage.models.efficientnet import (
     build_efficientnet_b0,
@@ -10,6 +11,7 @@ from kvasir_triage.models.efficientnet import (
     build_efficientnet_v2_m,
     build_efficientnet_v2_l,
 )
+from kvasir_triage.models.mobilenet import build_mobilenet_v3_large
 from kvasir_triage.models.tiny import build_tiny
 
 
@@ -40,6 +42,10 @@ _BUILDERS = {
         pretrained=cfg.get("pretrained", True),
         dropout=cfg.get("dropout", 0.2),
     ),
+    "mobilenet_v3_large": lambda cfg: build_mobilenet_v3_large(
+        pretrained=cfg.get("pretrained", True),
+        dropout=cfg.get("dropout", 0.2),
+    ),
     "tiny": lambda cfg: build_tiny(),
 }
 
@@ -50,6 +56,7 @@ _TRANSFER_HELPERS = {
     "efficientnet_v2_s": efficientnet_helpers,
     "efficientnet_v2_m": efficientnet_helpers,
     "efficientnet_v2_l": efficientnet_helpers,
+    "mobilenet_v3_large": mobilenet_helpers,
 }
 
 

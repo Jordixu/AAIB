@@ -93,6 +93,7 @@ def _save_eval_predictions(
             "filename": meta.get("filename", ""),
             "stem": meta.get("stem", ""),
             "fold": meta.get("fold", ""),
+            "split": meta.get("split", ""),
             "shard_rel_path": meta.get("shard_rel_path", ""),
             "local_idx": meta.get("local_idx", ""),
             "bbox_norm_area": meta.get("bbox_norm_area", ""),
@@ -119,6 +120,7 @@ def _save_eval_predictions(
         rel_paths=np.array([m.get("rel_path", "") for m in metas]),
         filenames=np.array([m.get("filename", "") for m in metas]),
         stems=np.array([m.get("stem", "") for m in metas]),
+        splits=np.array([m.get("split", "") for m in metas]),
     )
     return csv_path, npz_path
 
@@ -148,7 +150,13 @@ def _run_eval_pass(model, loader, device, desc: str):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("run_dir", type=Path)
-    parser.add_argument("--fold", type=int, default=None)
+    parser.add_argument(
+        "--fold",
+        type=int,
+        default=None,
+        choices=[0],
+        help="Legacy alias for split='train'. Only fold 0 is valid.",
+    )
     parser.add_argument("--split", choices=["val", "train"], default="val")
     parser.add_argument("--tta", action="store_true", help="Average logits over deterministic TTA variants.")
     args = parser.parse_args()
@@ -176,7 +184,12 @@ def main():
         ckpt_path = run_dir / "checkpoints" / "last.pt"
 
     ckpt = load_checkpoint(ckpt_path)
-    fold = args.fold if args.fold is not None else ckpt.get("cfg", {}).get("fold", 0)
+    fold = args.fold if args.fold is not None else ckpt.get("cfg", {}).get("fold", cfg.get("fold", 0))
+    if int(fold) != 0:
+        raise ValueError(
+            f"Refusing to evaluate legacy fold={fold} as a trained model. "
+            "Only fold 0 / split='train' is valid; fold 1 is validation."
+        )
 
     model = build_model(cfg["model"], cfg)
     model.load_state_dict(ckpt["model"])

@@ -1,4 +1,9 @@
-"""Train both folds and aggregate cross-validation results."""
+"""Train the fixed train split and write a holdout summary.
+
+This script keeps the old name for compatibility, but it no longer trains a
+second "fold" model. The dataset uses split=train for fitting, split=val for
+threshold calibration, and split=test for held-out evaluation.
+"""
 import argparse
 import subprocess
 import sys
@@ -8,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 import time
 
-from kvasir_triage.eval.crossval import load_fold_metrics, write_cv_summary
+from kvasir_triage.eval.crossval import write_cv_summary
 from kvasir_triage.log_setup import setup_logging
 from kvasir_triage.paths import cv_summary_root, logs_root, runs_root
 from kvasir_triage.utils import save_json
@@ -22,25 +27,24 @@ def main():
 
     log = setup_logging("train_cv", logs_root())
 
-    cv_id = f"{Path(args.config).stem}_cv_{time.strftime('%Y%m%d_%H%M%S')}"
+    cv_id = f"{Path(args.config).stem}_holdout_{time.strftime('%Y%m%d_%H%M%S')}"
     run_dirs = []
 
-    for fold in [0, 1]:
-        run_id = f"{cv_id}_fold{fold}"
-        cmd = [
-            sys.executable, str(Path(__file__).parent / "train.py"),
-            "--config", str(args.config),
-            "--fold", str(fold),
-            "--run-id", run_id,
-        ]
-        if args.max_epochs:
-            cmd += ["--max-epochs", str(args.max_epochs)]
+    run_id = f"{cv_id}_fold0"
+    cmd = [
+        sys.executable, str(Path(__file__).parent / "train.py"),
+        "--config", str(args.config),
+        "--fold", "0",
+        "--run-id", run_id,
+    ]
+    if args.max_epochs:
+        cmd += ["--max-epochs", str(args.max_epochs)]
 
-        log.info("Training fold %d ...", fold)
-        result = subprocess.run(cmd, check=True)
-        run_dirs.append(runs_root() / run_id)
+    log.info("Training split=train and validating on split=val ...")
+    subprocess.run(cmd, check=True)
+    run_dirs.append(runs_root() / run_id)
 
-    log.info("Aggregating cross-validation results ...")
+    log.info("Writing holdout summary ...")
     # load metrics from evaluate.py outputs if available, else train_result
     fold_metrics = []
     for d in run_dirs:
@@ -57,8 +61,11 @@ def main():
 
     out_dir = cv_summary_root() / cv_id
     write_cv_summary(fold_metrics, out_dir)
-    save_json({"cv_id": cv_id, "run_dirs": [str(d) for d in run_dirs]}, out_dir / "cv_index.json")
-    log.info("CV summary written to %s", out_dir)
+    save_json(
+        {"cv_id": cv_id, "summary_type": "holdout", "run_dirs": [str(d) for d in run_dirs]},
+        out_dir / "cv_index.json",
+    )
+    log.info("Holdout summary written to %s", out_dir)
 
 
 if __name__ == "__main__":

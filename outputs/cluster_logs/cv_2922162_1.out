@@ -1,0 +1,3 @@
+23:13:25  INFO     Log: /data/upfaabi/u231612/AAIB/outputs/logs/train_20260528_231325.log
+23:15:02  INFO     Done. Best PR-AUC: 0.4706  (1 epochs)
+23:15:02  INFO     Run dir: /data/upfaabi/u231612/AAIB/outputs/runs/effv2l_smoke_fold1

@@ -24,7 +24,8 @@ def time_one_epoch(loader) -> tuple[float, int]:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--fold", type=int, default=0)
+    parser.add_argument("--fold", type=int, default=0, choices=[0],
+                        help="Legacy alias for split='train'. Only fold 0 is valid.")
     parser.add_argument("--quick", action="store_true", help="Only test a small subset of configs")
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args()

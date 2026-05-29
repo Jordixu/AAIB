@@ -74,6 +74,7 @@ def build_suspicious_frame_report(
             "filename": meta.get("filename", ""),
             "stem": meta.get("stem", ""),
             "fold": meta.get("fold", ""),
+            "split": meta.get("split", ""),
             "shard_rel_path": meta.get("shard_rel_path", ""),
             "local_idx": meta.get("local_idx", ""),
             "bbox_norm_area": meta.get("bbox_norm_area", ""),

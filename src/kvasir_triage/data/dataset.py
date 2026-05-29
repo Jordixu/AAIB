@@ -20,12 +20,14 @@ def _meta_from_row(row) -> dict[str, Any]:
         "path",
         "filename",
         "stem",
+        "split",
         "shard_rel_path",
         "local_idx",
         "bbox_norm_area",
     ]
     meta = {key: row.get(key, "") for key in keys}
     meta["fold"] = int(row["fold"])
+    meta["split"] = row.get("split", "")
     meta["local_idx"] = int(row["local_idx"])
     return meta
 

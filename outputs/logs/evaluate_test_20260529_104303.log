@@ -1,0 +1,4 @@
+10:43:03  INFO     Log: /Users/jaumemalenacortes/Desktop/AABI/AAIB/outputs/logs/evaluate_test_20260529_104303.log
+10:43:03  INFO     Device: cpu
+10:43:03  INFO     Test set: 4995 images from 6 unique videos
+10:43:03  INFO     Loading run: outputs/runs/effv2l_full_fold0

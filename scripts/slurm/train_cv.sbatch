@@ -3,12 +3,12 @@
 #SBATCH -p gpu
 #SBATCH --output=/home/%u/logs/cv_%A_%a.out
 #SBATCH --error=/home/%u/logs/cv_%A_%a.err
-#SBATCH --array=0-1
+#SBATCH --array=0-0
 #SBATCH --gres=gpu:h100:1
 #SBATCH --mem=64G
 #SBATCH --time=12:00:00
 
-# Array job: fold 0 and fold 1 run in parallel on separate GPU nodes.
+# Compatibility array job: only fold 0 / split=train is valid.
 # Usage: sbatch --export=CONFIG=configs/densenet161_pretrained.yaml scripts/slurm/train_cv.sbatch
 # Optional: --export=CONFIG=configs/smoke.yaml,MAX_EPOCHS=2,MAX_BATCHES=5
 # Requires: bash scripts/slurm/setup_cluster.sh run once beforehand.
@@ -29,7 +29,7 @@ export PYTHONUNBUFFERED=1
 export ALBUMENTATIONS_NO_VERSION_CHECK=1
 export TORCH_HOME="$SLURM_SUBMIT_DIR/weights"
 
-FOLD=$SLURM_ARRAY_TASK_ID
+FOLD=0
 CONFIG="${CONFIG:-configs/densenet161_pretrained.yaml}"
 EXTRA_ARGS=()
 if [[ -n "${RUN_ID:-}" ]]; then

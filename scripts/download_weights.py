@@ -27,6 +27,8 @@ from torchvision.models import (
     EfficientNet_V2_M_Weights,
     efficientnet_v2_l,
     EfficientNet_V2_L_Weights,
+    mobilenet_v3_large,
+    MobileNet_V3_Large_Weights,
 )
 
 MODELS = [
@@ -35,6 +37,7 @@ MODELS = [
     ("EfficientNet-V2-S",  efficientnet_v2_s, EfficientNet_V2_S_Weights.IMAGENET1K_V1),
     ("EfficientNet-V2-M",  efficientnet_v2_m, EfficientNet_V2_M_Weights.IMAGENET1K_V1),
     ("EfficientNet-V2-L",  efficientnet_v2_l, EfficientNet_V2_L_Weights.IMAGENET1K_V1),
+    ("MobileNet-V3-Large", mobilenet_v3_large, MobileNet_V3_Large_Weights.IMAGENET1K_V2),
 ]
 
 if __name__ == "__main__":

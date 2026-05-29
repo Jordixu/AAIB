@@ -1,5 +1,5 @@
 #!/bin/bash
-# Submit EfficientNet-B0 two-fold training and validation evaluation jobs.
+# Submit EfficientNet-B0 training and validation evaluation jobs.
 #
 # Usage:
 #   bash scripts/slurm/submit_efficientnet_b0_results.sh
@@ -28,17 +28,9 @@ eval0_job=$(sbatch \
   --parsable \
   --dependency=afterok:"${train_job}" \
   scripts/slurm/evaluate.sbatch "outputs/runs/${RUN_ID}_fold0")
-echo "Submitted fold 0 evaluation: ${eval0_job}"
-
-eval1_job=$(sbatch \
-  --parsable \
-  --dependency=afterok:"${train_job}" \
-  scripts/slurm/evaluate.sbatch "outputs/runs/${RUN_ID}_fold1")
-echo "Submitted fold 1 evaluation: ${eval1_job}"
+echo "Submitted validation evaluation: ${eval0_job}"
 
 echo "RUN_ID=${RUN_ID}"
-echo "When both eval jobs finish, inspect:"
+echo "When the eval job finishes, inspect:"
 echo "  outputs/runs/${RUN_ID}_fold0/threshold_calibration.json"
-echo "  outputs/runs/${RUN_ID}_fold1/threshold_calibration.json"
 echo "  outputs/runs/${RUN_ID}_fold0/eval_predictions_val.csv"
-echo "  outputs/runs/${RUN_ID}_fold1/eval_predictions_val.csv"

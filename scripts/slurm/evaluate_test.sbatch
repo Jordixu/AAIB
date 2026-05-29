@@ -8,9 +8,9 @@
 #SBATCH --time=01:00:00
 
 # Held-out test set evaluation.
-# Requires threshold_calibration.json in each fold run directory (run evaluate.sbatch first).
-# Usage: sbatch scripts/slurm/evaluate_test.sbatch outputs/runs/myrun_fold0 outputs/runs/myrun_fold1
-#        sbatch scripts/slurm/evaluate_test.sbatch outputs/runs/myrun_fold0  (single model)
+# Requires threshold_calibration.json in each run directory (run evaluate.sbatch first).
+# Usage: sbatch scripts/slurm/evaluate_test.sbatch outputs/runs/myrun_fold0
+#        sbatch scripts/slurm/evaluate_test.sbatch outputs/runs/run_a_fold0 outputs/runs/run_b_fold0
 # Requires: bash scripts/slurm/setup_cluster.sh run once beforehand.
 
 set -euo pipefail
