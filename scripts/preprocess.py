@@ -142,6 +142,12 @@ def main():
     parser.add_argument("--test-fraction", type=float, default=0.15,
                         help="Fraction held out as test split. "
                              "Default: 0.15.")
+    parser.add_argument("--rare-threshold", type=int, default=1000,
+                        help="Classes with fewer total images than this value get a "
+                             "boosted train fraction. Set to 0 to disable. Default: 1000.")
+    parser.add_argument("--rare-train-fraction", type=float, default=0.80,
+                        help="Train fraction applied to rare classes (those below "
+                             "--rare-threshold). Default: 0.80.")
     args = parser.parse_args()
 
     log = setup_logging("preprocess", logs_root())
@@ -186,16 +192,21 @@ def main():
 
     # Assign folds with subclass-stratified video-level splits
     log.info(
-        "Building subclass-stratified splits (val_fraction=%.2f, test_fraction=%.2f, seed=%d) ...",
+        "Building subclass-stratified splits (val_fraction=%.2f, test_fraction=%.2f, seed=%d, "
+        "rare_threshold=%d, rare_train_fraction=%.2f) ...",
         args.val_fraction,
         args.test_fraction,
         args.seed,
+        args.rare_threshold,
+        args.rare_train_fraction,
     )
     df = build_subclass_stratified_splits(
         df,
         val_fraction=args.val_fraction,
         test_fraction=args.test_fraction,
         seed=args.seed,
+        rare_threshold=args.rare_threshold,
+        rare_train_fraction=args.rare_train_fraction,
     )
     log.info(
         "Split: train=%d  val=%d  test=%d",

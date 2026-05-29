@@ -52,20 +52,20 @@ def build_subclass_stratified_splits(
     val_fraction: float = 0.15,
     test_fraction: float = 0.15,
     seed: int = 42,
+    rare_threshold: int = 0,
+    rare_train_fraction: float = 0.80,
 ) -> pd.DataFrame:
     """Assign each image to split=train, val, or test.
 
-    Video-level assignment using multi-label iterative stratification over the
-    full set of subclasses present in each video — not just the primary subclass.
-    This guarantees proportional representation of every subclass across all splits
-    (subject to having enough videos; classes with only 1–2 videos cannot appear
-    in all three splits simultaneously).
+    Assignment unit: (video_id, subclass) groups. All frames sharing the same
+    video and subclass are kept together in one split to avoid within-class
+    within-video leakage. Frames from the same video but different subclasses
+    may be assigned to different splits (cross-class assignment), which avoids
+    rare-class frames being dragged into val/test by a dominant co-occurring class.
 
-    Algorithm: Sechidis et al. 2011 iterative stratification, adapted for three
-    splits. Videos are processed rarest-subclass-first; each is assigned to the
-    split with the highest remaining desired image count for the triggering subclass,
-    then the desired counts for all subclasses present in that video are
-    decremented for the chosen split.
+    For rare classes (total frames < rare_threshold), the largest (video, subclass)
+    groups are preferentially assigned to train first. For common classes, groups
+    are shuffled by a deterministic hash to approximate target proportions.
 
     Parameters
     ----------
@@ -73,6 +73,10 @@ def build_subclass_stratified_splits(
     val_fraction : proportion reserved for validation
     test_fraction : proportion reserved for held-out test
     seed : integer seed for deterministic hash-based ordering
+    rare_threshold : classes with fewer total images than this value are treated as
+        rare and receive a boosted train fraction. 0 disables the feature.
+    rare_train_fraction : train fraction applied to rare classes (the remainder is
+        split between val and test in their original ratio).
     """
     train_fraction = 1.0 - val_fraction - test_fraction
     if train_fraction <= 0:
@@ -81,82 +85,71 @@ def build_subclass_stratified_splits(
     df = image_df.copy()
     df["_vid"] = df["stem"].apply(infer_video_id)
 
-    # Count matrix: video × subclass. The assignment unit is the whole video, but
-    # using image counts for desired quotas keeps image-level train/val/test
-    # proportions closer to 70/15/15 than video-presence counts alone.
-    vid_sc_counts = (
-        df.groupby(["_vid", "subclass"])
-        .size()
-        .unstack(fill_value=0)
-        .astype(int)
-    )
-    vid_sc = (
-        vid_sc_counts
-        .gt(0)
-        .astype(int)
-    )
-    vids = vid_sc.index.tolist()
-    subclasses = vid_sc.columns.tolist()
+    subclasses = sorted(df["subclass"].unique().tolist())
+    n_images_with_sc = df.groupby("subclass").size().to_dict()
 
-    target = {0: train_fraction, 1: val_fraction, 2: test_fraction}
+    def _class_fracs(sc: str) -> dict[int, float]:
+        if rare_threshold > 0 and n_images_with_sc[sc] < rare_threshold:
+            non_train = 1.0 - rare_train_fraction
+            val_test_sum = val_fraction + test_fraction
+            if val_test_sum > 0:
+                rare_val = val_fraction / val_test_sum * non_train
+                rare_test = test_fraction / val_test_sum * non_train
+            else:
+                rare_val = rare_test = non_train / 2.0
+            return {0: rare_train_fraction, 1: rare_val, 2: rare_test}
+        return {0: train_fraction, 1: val_fraction, 2: test_fraction}
 
-    # n_vids_with_sc[sc] = number of videos that contain subclass sc
-    n_vids_with_sc = vid_sc.sum(axis=0).to_dict()
-    n_images_with_sc = vid_sc_counts.sum(axis=0).to_dict()
+    def _hash(vid: str, sc: str) -> str:
+        return hashlib.md5(f"{seed}:{vid}:{sc}".encode()).hexdigest()
 
-    # Desired number of images per subclass and split, updated as videos are assigned.
-    desired: dict[int, dict[str, float]] = {
-        split_id: {sc: n_images_with_sc[sc] * frac for sc in subclasses}
-        for split_id, frac in target.items()
-    }
+    # (video_id, subclass) → split_id
+    vid_sc_split: dict[tuple[str, str], int] = {}
 
-    def _hash(vid: str) -> str:
-        return hashlib.md5(f"{seed}:{vid}".encode()).hexdigest()
-
-    # Process subclasses rarest-first (fewest videos containing that class)
-    subclasses_by_rarity = sorted(subclasses, key=lambda sc: n_vids_with_sc[sc])
-
-    vid_fold: dict[str, int] = {}
-    assigned: set[str] = set()
-
-    for sc in subclasses_by_rarity:
-        sc_vids = sorted(
-            [v for v in vids if vid_sc.loc[v, sc] and v not in assigned],
-            key=_hash,
+    for sc in subclasses:
+        grp = (
+            df[df["subclass"] == sc]
+            .groupby("_vid")
+            .size()
+            .reset_index(name="n")
         )
-        for vid in sc_vids:
-            present_splits = {
-                vid_fold[v]
-                for v in assigned
-                if vid_sc.loc[v, sc]
-            }
-            missing_splits = [f for f in target if f not in present_splits]
-            best_split = max(missing_splits or desired, key=lambda f: desired[f][sc])
-            vid_fold[vid] = best_split
-            assigned.add(vid)
-            # Decrement desired for every subclass this video covers
-            for sc2 in subclasses:
-                n_sc2 = int(vid_sc_counts.loc[vid, sc2])
-                if n_sc2:
-                    desired[best_split][sc2] = max(0.0, desired[best_split][sc2] - n_sc2)
+        is_rare = rare_threshold > 0 and n_images_with_sc[sc] < rare_threshold
 
-    # Assign any remaining videos proportionally by image count.
-    video_sizes = df.groupby("_vid").size().to_dict()
-    fold_counts = {
-        f: sum(video_sizes[v] for v, assigned_f in vid_fold.items() if assigned_f == f)
-        for f in target
-    }
-    for vid in sorted(set(vids) - assigned, key=_hash):
-        best_fold = min(fold_counts, key=lambda f: fold_counts[f] / target[f])
-        vid_fold[vid] = best_fold
-        fold_counts[best_fold] += video_sizes[vid]
+        if is_rare:
+            # Largest groups first so the most frames flow into train.
+            grp = grp.sort_values("n", ascending=False).reset_index(drop=True)
+        else:
+            grp["_h"] = grp["_vid"].apply(lambda v: _hash(v, sc))
+            grp = grp.sort_values("_h").reset_index(drop=True)
 
-    df["fold"] = df["_vid"].map(vid_fold)
+        n_total = int(grp["n"].sum())
+        fracs = _class_fracs(sc)
+        remaining = {f: n_total * fracs[f] for f in (0, 1, 2)}
+        covered: set[int] = set()
+        rows = list(zip(grp["_vid"], grp["n"]))
+        n_groups = len(rows)
 
-    n_missing = df["fold"].isna().sum()
+        for idx, (vid, n) in enumerate(rows):
+            still_needed = [f for f in (0, 1, 2) if f not in covered]
+            future = n_groups - idx - 1
+
+            if still_needed and future < len(still_needed):
+                # Too few groups left to cover every missing split individually;
+                # force coverage of the split with the highest remaining quota.
+                best = max(still_needed, key=lambda f: remaining[f])
+            else:
+                best = max((0, 1, 2), key=lambda f: remaining[f])
+
+            vid_sc_split[(vid, sc)] = best
+            covered.add(best)
+            remaining[best] = max(0.0, remaining[best] - n)
+
+    df["fold"] = [vid_sc_split.get((v, s), -1) for v, s in zip(df["_vid"], df["subclass"])]
+
+    n_missing = (df["fold"] == -1).sum()
     if n_missing > 0:
         warnings.warn(f"{n_missing} images have no fold assignment and will be dropped.")
-        df = df[df["fold"].notna()].copy()
+        df = df[df["fold"] != -1].copy()
 
     df["fold"] = df["fold"].astype(int)
     df["split"] = df["fold"].map(SPLIT_ID_TO_NAME)

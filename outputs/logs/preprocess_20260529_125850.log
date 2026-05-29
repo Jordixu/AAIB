@@ -1,0 +1,121 @@
+12:58:50  INFO     Log: D:\Git\AAIB\outputs\logs\preprocess_20260529_125850.log
+12:58:50  INFO     labelled_images: D:\Git\AAIB\data\labelled_images
+12:58:50  INFO     Scanning images ...
+12:58:53  INFO     Found 46715 images across 10 subclasses
+12:58:53  DEBUG      Normal clean mucosa            34338
+12:58:53  DEBUG      Ileocecal valve                4189
+12:58:53  DEBUG      Reduced mucosal view           2906
+12:58:53  DEBUG      Pylorus                        1529
+12:58:53  DEBUG      Angiectasia                    866
+12:58:53  DEBUG      Ulcer                          854
+12:58:53  DEBUG      Foreign body                   776
+12:58:53  DEBUG      Lymphangiectasia               592
+12:58:53  DEBUG      Erosion                        506
+12:58:53  DEBUG      Erythema                       159
+12:58:53  INFO     Loading bbox metadata from D:\Git\AAIB\data\metadata.csv
+12:58:53  DEBUG    Metadata CSV columns: ['filename', 'video_id', 'frame_number', 'finding_category', 'finding_class', 'x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4']
+12:58:54  INFO       bbox_norm_area populated for 3720 / 46715 rows
+12:58:54  INFO     Building subclass-stratified splits (val_fraction=0.15, test_fraction=0.15, seed=42, rare_threshold=1000, rare_train_fraction=0.85) ...
+12:58:54  INFO     Split: train=28225  val=9526  test=8964
+12:58:54  INFO       Angiectasia                     train=106  val=652  test=108
+12:58:54  INFO       Erosion                         train=353  val=81  test=72
+12:58:54  INFO       Erythema                        train=123  val=27  test=9
+12:58:54  INFO       Foreign body                    train=753  val=6  test=17
+12:58:54  INFO       Ileocecal valve                 train=2826  val=583  test=780
+12:58:54  INFO       Lymphangiectasia                train=368  val=150  test=74
+12:58:54  INFO       Normal clean mucosa             train=20757  val=6464  test=7117
+12:58:54  INFO       Pylorus                         train=1016  val=324  test=189
+12:58:54  INFO       Reduced mucosal view            train=1341  val=1094  test=471
+12:58:54  INFO       Ulcer                           train=582  val=145  test=127
+12:58:54  INFO     Subclass × split distribution:
+split                 test  train   val
+subclass                               
+Angiectasia            108    106   652
+Erosion                 72    353    81
+Erythema                 9    123    27
+Foreign body            17    753     6
+Ileocecal valve        780   2826   583
+Lymphangiectasia        74    368   150
+Normal clean mucosa   7117  20757  6464
+Pylorus                189   1016   324
+Reduced mucosal view   471   1341  1094
+Ulcer                  127    582   145
+12:58:54  WARNING  Split 'train' is 60.42% of images, target 70.00%. Video-level grouping and subclass coverage can prevent exact ratios.
+12:58:54  WARNING  Split 'val' is 20.39% of images, target 15.00%. Video-level grouping and subclass coverage can prevent exact ratios.
+12:58:54  INFO     Distribution check PASSED: all subclasses present in all splits.
+12:58:54  INFO     Corner mask saved to D:\Git\AAIB\outputs\preprocessed\corner_keep_mask_336.npy
+12:58:54  INFO     Writing split 'train' (28225 images) ...
+12:58:54  DEBUG      Skipping existing shard: train_shard_0000.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0001.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0002.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0003.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0004.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0005.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0006.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0007.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0008.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0009.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0010.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0011.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0012.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0013.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0014.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0015.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0016.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0017.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0018.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0019.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0020.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0021.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0022.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0023.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0024.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0025.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0026.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0027.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0028.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0029.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0030.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0031.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0032.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0033.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0034.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0035.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0036.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0037.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0038.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0039.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0040.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0041.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0042.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0043.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0044.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0045.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0046.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0047.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0048.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0049.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0050.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0051.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0052.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0053.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0054.npz
+12:58:54  DEBUG      Skipping existing shard: train_shard_0055.npz
+12:58:54  INFO     Writing split 'val' (9526 images) ...
+12:58:54  DEBUG      Skipping existing shard: val_shard_0000.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0001.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0002.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0003.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0004.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0005.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0006.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0007.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0008.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0009.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0010.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0011.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0012.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0013.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0014.npz
+12:58:54  DEBUG      Skipping existing shard: val_shard_0015.npz
+12:58:54  INFO       Writing val_shard_0016.npz (512 images) ...

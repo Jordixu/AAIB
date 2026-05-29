@@ -1,0 +1,17 @@
+{
+  "target_size": 336,
+  "shard_size": 512,
+  "n_total": 46715,
+  "split_mapping": {
+    "fold_0": "train",
+    "fold_1": "val",
+    "fold_2": "test"
+  },
+  "excluded_classes": [
+    "Polyp",
+    "Blood - fresh",
+    "Blood - hematin",
+    "Ampulla of Vater"
+  ],
+  "bbox_source": "D:\\Git\\AAIB\\data\\metadata.csv"
+}

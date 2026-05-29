@@ -8,7 +8,6 @@
 #SBATCH --mem=64G
 #SBATCH --time=12:00:00
 
-# Compatibility array job: only fold 0 / split=train is valid.
 # Usage: sbatch --export=CONFIG=configs/densenet161_pretrained.yaml scripts/slurm/train_cv.sbatch
 # Optional: --export=CONFIG=configs/smoke.yaml,MAX_EPOCHS=2,MAX_BATCHES=5
 # Requires: bash scripts/slurm/setup_cluster.sh run once beforehand.

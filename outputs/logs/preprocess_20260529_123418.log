@@ -1,0 +1,51 @@
+12:34:18  INFO     Log: D:\Git\AAIB\outputs\logs\preprocess_20260529_123418.log
+12:34:18  INFO     labelled_images: D:\Git\AAIB\data\labelled_images
+12:34:18  INFO     Scanning images ...
+12:34:19  INFO     Found 46715 images across 10 subclasses
+12:34:19  DEBUG      Normal clean mucosa            34338
+12:34:19  DEBUG      Ileocecal valve                4189
+12:34:19  DEBUG      Reduced mucosal view           2906
+12:34:19  DEBUG      Pylorus                        1529
+12:34:19  DEBUG      Angiectasia                    866
+12:34:19  DEBUG      Ulcer                          854
+12:34:19  DEBUG      Foreign body                   776
+12:34:19  DEBUG      Lymphangiectasia               592
+12:34:19  DEBUG      Erosion                        506
+12:34:19  DEBUG      Erythema                       159
+12:34:19  INFO     Loading bbox metadata from D:\Git\AAIB\data\metadata.csv
+12:34:19  DEBUG    Metadata CSV columns: ['filename', 'video_id', 'frame_number', 'finding_category', 'finding_class', 'x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4']
+12:34:20  INFO       bbox_norm_area populated for 3720 / 46715 rows
+12:34:20  INFO     Building subclass-stratified splits (val_fraction=0.15, test_fraction=0.15, seed=42, rare_threshold=1000, rare_train_fraction=0.80) ...
+12:34:20  INFO     Split: train=28562  val=12383  test=5770
+12:34:20  INFO       Angiectasia                     train=193  val=652  test=21
+12:34:20  INFO       Erosion                         train=435  val=39  test=32
+12:34:20  INFO       Erythema                        train=9  val=27  test=123
+12:34:20  INFO       Foreign body                    train=197  val=573  test=6
+12:34:20  INFO       Ileocecal valve                 train=2929  val=656  test=604
+12:34:20  INFO       Lymphangiectasia                train=74  val=150  test=368
+12:34:20  INFO       Normal clean mucosa             train=22038  val=8316  test=3984
+12:34:20  INFO       Pylorus                         train=987  val=294  test=248
+12:34:20  INFO       Reduced mucosal view            train=1573  val=1094  test=239
+12:34:20  INFO       Ulcer                           train=127  val=582  test=145
+12:34:20  INFO     Subclass × split distribution:
+split                 test  train   val
+subclass                               
+Angiectasia             21    193   652
+Erosion                 32    435    39
+Erythema               123      9    27
+Foreign body             6    197   573
+Ileocecal valve        604   2929   656
+Lymphangiectasia       368     74   150
+Normal clean mucosa   3984  22038  8316
+Pylorus                248    987   294
+Reduced mucosal view   239   1573  1094
+Ulcer                  145    127   582
+12:34:20  WARNING  Split 'train' is 61.14% of images, target 70.00%. Video-level grouping and subclass coverage can prevent exact ratios.
+12:34:20  WARNING  Split 'val' is 26.51% of images, target 15.00%. Video-level grouping and subclass coverage can prevent exact ratios.
+12:34:20  INFO     Distribution check PASSED: all subclasses present in all splits.
+12:34:20  INFO     Corner mask saved to D:\Git\AAIB\outputs\preprocessed\corner_keep_mask_336.npy
+12:34:20  INFO     Writing split 'train' (28562 images) ...
+12:34:20  DEBUG      Skipping existing shard: train_shard_0000.npz
+12:34:20  DEBUG      Skipping existing shard: train_shard_0001.npz
+12:34:20  INFO       Writing train_shard_0002.npz (512 images) ...
+12:34:22  INFO       Writing train_shard_0003.npz (512 images) ...
