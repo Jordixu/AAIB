@@ -1,0 +1,47 @@
+{
+  "n_images": 4995,
+  "n_models_ensembled": 1,
+  "metrics_at_0.5": {
+    "pr_auc": 0.6817392811935958,
+    "mcc": 0.615438775123351,
+    "npv": 0.9274725274725275,
+    "tp": 365,
+    "fp": 80,
+    "tn": 4220,
+    "fn": 330
+  },
+  "metrics_at_calibrated_threshold": {
+    "threshold": 0.03161161161161161,
+    "tp": 679,
+    "tn": 728,
+    "fp": 3572,
+    "fn": 16,
+    "npv": 0.9785,
+    "precision": 0.1597,
+    "recall": 0.977
+  },
+  "subclass_recall": {
+    "Angiectasia": 0.9523809523809523,
+    "Erosion": 0.53125,
+    "Erythema": 0.5203252032520326,
+    "Foreign body": 0.6666666666666666,
+    "Lymphangiectasia": 0.32608695652173914,
+    "Ulcer": 0.9655172413793104
+  },
+  "subclass_recall_at_calibrated_threshold": {
+    "Angiectasia": 1.0,
+    "Erosion": 1.0,
+    "Erythema": 0.967479674796748,
+    "Foreign body": 0.8333333333333334,
+    "Lymphangiectasia": 0.970108695652174,
+    "Ulcer": 1.0
+  },
+  "speed": {
+    "images": 4995,
+    "total_seconds": 19.15,
+    "images_per_sec": 260.8
+  },
+  "run_dirs": [
+    "outputs/runs/efficientnet_v2_s_full_fold0"
+  ]
+}

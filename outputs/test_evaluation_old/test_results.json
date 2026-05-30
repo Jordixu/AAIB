@@ -1,0 +1,30 @@
+{
+  "n_images": 4995,
+  "n_models_ensembled": 1,
+  "metrics_at_0.5": {
+    "pr_auc": 0.5586338984805604,
+    "mcc": 0.5051464177849728,
+    "npv": 0.9197503343736068,
+    "tp": 335,
+    "fp": 174,
+    "tn": 4126,
+    "fn": 360
+  },
+  "metrics_at_calibrated_threshold": null,
+  "subclass_recall": {
+    "Angiectasia": 0.9523809523809523,
+    "Erosion": 0.3125,
+    "Erythema": 0.5203252032520326,
+    "Foreign body": 0.16666666666666666,
+    "Lymphangiectasia": 0.37771739130434784,
+    "Ulcer": 0.696551724137931
+  },
+  "speed": {
+    "images": 4995,
+    "total_seconds": 18.05,
+    "images_per_sec": 276.7
+  },
+  "run_dirs": [
+    "outputs/runs/efficientnet_b0_full_fold0"
+  ]
+}

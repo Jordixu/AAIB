@@ -1,39 +1,47 @@
 {
-  "n_images": 6284,
+  "n_images": 4995,
   "n_models_ensembled": 1,
   "metrics_at_0.5": {
-    "pr_auc": 0.11370158319439445,
-    "mcc": 0.20138156342286792,
-    "npv": 0.9647550776583035,
-    "tp": 194,
-    "fp": 1068,
-    "tn": 4845,
-    "fn": 177
+    "pr_auc": 0.5541573561834661,
+    "mcc": 0.4918309058334011,
+    "npv": 0.9162976085031,
+    "tp": 317,
+    "fp": 162,
+    "tn": 4138,
+    "fn": 378
   },
   "metrics_at_calibrated_threshold": {
-    "threshold": 0.3410510510510511,
-    "tp": 223,
-    "tn": 4675,
-    "fp": 1238,
-    "fn": 148,
-    "npv": 0.9693,
-    "precision": 0.1526,
-    "recall": 0.6011
+    "threshold": 0.04705705705705706,
+    "tp": 660,
+    "tn": 967,
+    "fp": 3333,
+    "fn": 35,
+    "npv": 0.9651,
+    "precision": 0.1653,
+    "recall": 0.9496
   },
   "subclass_recall": {
+    "Angiectasia": 0.9047619047619048,
+    "Erosion": 0.28125,
+    "Erythema": 0.5203252032520326,
+    "Foreign body": 0.16666666666666666,
+    "Lymphangiectasia": 0.30434782608695654,
+    "Ulcer": 0.7724137931034483
+  },
+  "subclass_recall_at_calibrated_threshold": {
     "Angiectasia": 1.0,
-    "Erosion": 0.65625,
-    "Erythema": 0.2222222222222222,
-    "Foreign body": 0.30434782608695654,
-    "Lymphangiectasia": 0.05405405405405406,
-    "Ulcer": 0.5118110236220472
+    "Erosion": 0.90625,
+    "Erythema": 0.943089430894309,
+    "Foreign body": 0.8333333333333334,
+    "Lymphangiectasia": 0.9347826086956522,
+    "Ulcer": 1.0
   },
   "speed": {
-    "images": 6284,
-    "total_seconds": 8.08,
-    "images_per_sec": 777.3
+    "images": 4995,
+    "total_seconds": 3.99,
+    "images_per_sec": 1253.4
   },
   "run_dirs": [
-    "/home/u231612/outputs/runs/mobilenet_v3_large_fold0_20260529_155337"
+    "outputs/runs/mobilenet_v3_large_full_fold0"
   ]
 }
