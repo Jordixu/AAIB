@@ -17,7 +17,7 @@ from kvasir_triage.config import load_config
 from kvasir_triage.data.dataloaders import make_dataloaders
 from kvasir_triage.data.transforms import AlbumentationsWrapper, make_tta_transforms_for_fold
 from kvasir_triage.eval.metrics import compute_metrics, per_subclass_recall
-from kvasir_triage.eval.threshold import find_safe_threshold
+from kvasir_triage.eval.threshold import find_threshold_by_recall
 from kvasir_triage.models.registry import build_model
 from kvasir_triage.log_setup import setup_logging
 from kvasir_triage.paths import logs_root, manifest_path
@@ -63,9 +63,9 @@ def _save_eval_predictions(
     if is_binary:
         probs = 1.0 / (1.0 + np.exp(-logits_2d[:, 0]))
         pred_labels = (probs >= 0.5).astype(np.int64)
-        t_safe = threshold_result.get("t_safe")
+        t_cal = threshold_result.get("threshold")
         pred_labels_safe = (
-            (probs >= t_safe).astype(np.int64) if t_safe is not None else np.full(len(probs), -1)
+            (probs >= t_cal).astype(np.int64) if t_cal is not None else np.full(len(probs), -1)
         )
     else:
         shifted = logits_2d - logits_2d.max(axis=1, keepdims=True)
@@ -84,7 +84,7 @@ def _save_eval_predictions(
             "split": split,
             "true_label": int(label),
             "predicted_label": int(pred),
-            "predicted_label_t_safe": int(pred_safe),
+            "predicted_label_calibrated": int(pred_safe),
             "probability": float(prob),
             "class": meta.get("subclass", ""),
             "subclass": meta.get("subclass", ""),
@@ -113,7 +113,7 @@ def _save_eval_predictions(
         logits=logits_2d,
         true_labels=labels_np,
         predicted_labels=pred_labels,
-        predicted_labels_t_safe=pred_labels_safe,
+        predicted_labels_calibrated=pred_labels_safe,
         probabilities=probs,
         classes=np.array([m.get("subclass", "") for m in metas]),
         subclasses=np.array([m.get("subclass", "") for m in metas]),
@@ -266,7 +266,7 @@ def main():
 
     metrics = compute_metrics(logits_np, labels_np)
     subclass_recall = per_subclass_recall(logits_np, labels_np, all_subclasses)
-    threshold_result = find_safe_threshold(logits_np, labels_np)
+    threshold_result = find_threshold_by_recall(logits_np, labels_np)
 
     speed = {
         "images": n,
@@ -286,11 +286,12 @@ def main():
         threshold_result,
     )
 
-    log.info("PR-AUC:  %.4f", metrics["pr_auc"])
-    log.info("MCC:     %.4f", metrics["mcc"])
-    log.info("NPV:     %.4f", metrics["npv"])
-    log.info("t_safe:  %s", threshold_result.get("t_safe"))
-    log.info("Speed:   %s img/s  (%s ms/img)", speed["images_per_sec"], speed["median_ms_per_image"])
+    log.info("PR-AUC:    %.4f", metrics["pr_auc"])
+    log.info("MCC:       %.4f", metrics["mcc"])
+    log.info("NPV:       %.4f", metrics["npv"])
+    log.info("threshold: %s  (status=%s)", threshold_result.get("threshold"), threshold_result.get("status"))
+    log.info("recall:    %s  precision: %s", threshold_result.get("recall"), threshold_result.get("precision"))
+    log.info("Speed:     %s img/s  (%s ms/img)", speed["images_per_sec"], speed["median_ms_per_image"])
     log.info("Predictions saved: %s", csv_path)
     log.info("Prediction arrays saved: %s", npz_path)
 

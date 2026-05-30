@@ -1,7 +1,7 @@
 """Evaluate trained model(s) on the held-out test split.
 
 Run after training and evaluate.py (threshold calibration must exist).
-Uses the NPV-safe threshold calibrated on the validation split - the test set
+Uses the recall-calibrated threshold from the validation split - the test set
 is never used for calibration.
 
 Single model:
@@ -39,10 +39,10 @@ from kvasir_triage.utils import load_json, save_json
 
 
 def _load_run(run_dir: Path, device: torch.device, norm_stats: dict) -> tuple:
-    """Load a checkpoint and return (model, t_safe, train_fold).
+    """Load a checkpoint and return (model, t_cal, train_fold).
 
-    Uses the t_safe threshold from threshold_calibration.json so the test set
-    is never used to set the operating threshold.
+    Uses the recall-calibrated threshold from threshold_calibration.json so the
+    test set is never used to set the operating threshold.
     """
     cfg_path = run_dir / "config.snapshot.yaml"
     if not cfg_path.exists():
@@ -82,9 +82,9 @@ def _load_run(run_dir: Path, device: torch.device, norm_stats: dict) -> tuple:
             "Run evaluate.py on this run first."
         )
     cal = load_json(cal_path)
-    t_safe = cal.get("t_safe")
+    t_cal = cal.get("threshold")
 
-    return model, t_safe, train_fold, cfg
+    return model, t_cal, train_fold, cfg
 
 
 def _run_inference(
@@ -151,14 +151,14 @@ def evaluate_test(run_dirs: list[Path], log) -> dict:
              test_df["stem"].str.split("_").str[0].nunique())
 
     all_probs: list[np.ndarray] = []
-    t_safes: list[float] = []
+    t_cals: list[float] = []
     labels_np: np.ndarray | None = None
     subclasses: list[str] | None = None
 
     t0 = time.perf_counter()
     for run_dir in run_dirs:
         log.info("Loading run: %s", run_dir)
-        model, t_safe, train_fold, cfg = _load_run(run_dir, device, norm_stats)
+        model, t_cal, train_fold, cfg = _load_run(run_dir, device, norm_stats)
         bs = cfg.get("batch_size", 32)
         nw = cfg.get("num_workers", 4)
         if device.type == "cpu":
@@ -171,8 +171,8 @@ def evaluate_test(run_dirs: list[Path], log) -> dict:
         )
         probs = 1.0 / (1.0 + np.exp(-logits))  # sigmoid
         all_probs.append(probs)
-        if t_safe is not None:
-            t_safes.append(t_safe)
+        if t_cal is not None:
+            t_cals.append(t_cal)
 
         if labels_np is None:
             labels_np = labels
@@ -189,8 +189,9 @@ def evaluate_test(run_dirs: list[Path], log) -> dict:
     subclass_recall = per_subclass_recall(ensemble_logits, labels_np, subclasses)
 
     # Apply val-calibrated threshold if available
-    t_ensemble = float(np.mean(t_safes)) if t_safes else None
+    t_ensemble = float(np.mean(t_cals)) if t_cals else None
     metrics_calibrated: dict | None = None
+    subclass_recall_cal: dict | None = None
     if t_ensemble is not None:
         preds_cal = (ensemble_probs >= t_ensemble).astype(int)
         tp = int(((preds_cal == 1) & (labels_np == 1)).sum())
@@ -207,6 +208,9 @@ def evaluate_test(run_dirs: list[Path], log) -> dict:
             "precision": round(precision, 4),
             "recall": round(recall, 4),
         }
+        subclass_recall_cal = per_subclass_recall(
+            ensemble_logits, labels_np, subclasses, threshold=t_ensemble
+        )
 
     speed = {
         "images": len(test_df),
@@ -220,18 +224,24 @@ def evaluate_test(run_dirs: list[Path], log) -> dict:
         "metrics_at_0.5": metrics_default,
         "metrics_at_calibrated_threshold": metrics_calibrated,
         "subclass_recall": subclass_recall,
+        "subclass_recall_at_calibrated_threshold": subclass_recall_cal,
         "speed": speed,
         "run_dirs": [str(d) for d in run_dirs],
     }
 
     log.info("=== Test set results ===")
-    log.info("PR-AUC:  %.4f", metrics_default["pr_auc"])
-    log.info("MCC:     %.4f", metrics_default["mcc"])
-    log.info("NPV@0.5: %.4f", metrics_default["npv"])
+    log.info("PR-AUC:    %.4f", metrics_default["pr_auc"])
+    log.info("MCC:       %.4f", metrics_default["mcc"])
+    log.info("NPV@0.5:   %.4f", metrics_default["npv"])
     if metrics_calibrated:
-        log.info("NPV@t_safe(%.3f): %.4f  (TP=%d FN=%d)",
-                 t_ensemble, metrics_calibrated["npv"],
-                 metrics_calibrated["tp"], metrics_calibrated["fn"])
+        log.info(
+            "recall@t_cal(%.3f): %.4f  precision: %.4f  (TP=%d FN=%d)",
+            t_ensemble,
+            metrics_calibrated["recall"],
+            metrics_calibrated["precision"],
+            metrics_calibrated["tp"],
+            metrics_calibrated["fn"],
+        )
     log.info("Subclass recall: %s", subclass_recall)
 
     return result
