@@ -1,164 +1,177 @@
 {
   "class_counts_by_fold": {
-    "0": {
-      "Normal clean mucosa": 10556,
-      "Ileocecal valve": 2408,
-      "Reduced mucosal view": 762,
-      "Angiectasia": 760,
-      "Pylorus": 578,
-      "Ulcer": 272,
-      "Lymphangiectasia": 224,
-      "Foreign body": 203,
-      "Erosion": 81,
-      "Erythema": 36,
-      "Blood - fresh": 22
-    },
-    "1": {
-      "Normal clean mucosa": 14755,
-      "Ileocecal valve": 902,
-      "Reduced mucosal view": 1974,
-      "Angiectasia": 67,
-      "Pylorus": 519,
+    "Train": {
+      "Normal clean mucosa": 24137,
+      "Ileocecal valve": 2906,
+      "Reduced mucosal view": 1991,
+      "Pylorus": 1080,
+      "Angiectasia": 684,
       "Ulcer": 582,
-      "Lymphangiectasia": 368,
-      "Foreign body": 0,
-      "Erosion": 377,
-      "Erythema": 0,
-      "Blood - fresh": 424
-    },
-    "2": {
-      "Normal clean mucosa": 9027,
-      "Ileocecal valve": 879,
-      "Reduced mucosal view": 170,
-      "Angiectasia": 39,
-      "Pylorus": 432,
-      "Ulcer": 0,
-      "Lymphangiectasia": 0,
       "Foreign body": 573,
-      "Erosion": 48,
-      "Erythema": 123,
-      "Blood - fresh": 0
+      "Erosion": 406,
+      "Lymphangiectasia": 368,
+      "Erythema": 123
+    },
+    "Val": {
+      "Normal clean mucosa": 5793,
+      "Ileocecal valve": 621,
+      "Reduced mucosal view": 291,
+      "Pylorus": 230,
+      "Angiectasia": 108,
+      "Ulcer": 145,
+      "Foreign body": 180,
+      "Erosion": 36,
+      "Lymphangiectasia": 150,
+      "Erythema": 27
+    },
+    "Test": {
+      "Normal clean mucosa": 4408,
+      "Ileocecal valve": 662,
+      "Reduced mucosal view": 624,
+      "Pylorus": 219,
+      "Angiectasia": 74,
+      "Ulcer": 127,
+      "Foreign body": 23,
+      "Erosion": 64,
+      "Lymphangiectasia": 74,
+      "Erythema": 9
+    }
+  },
+  "class_counts_stacked_by_split": {
+    "Train": {
+      "Normal clean mucosa": 24137,
+      "Ileocecal valve": 2906,
+      "Reduced mucosal view": 1991,
+      "Pylorus": 1080,
+      "Angiectasia": 684,
+      "Ulcer": 582,
+      "Foreign body": 573,
+      "Erosion": 406,
+      "Lymphangiectasia": 368,
+      "Erythema": 123
+    },
+    "Val": {
+      "Normal clean mucosa": 5793,
+      "Ileocecal valve": 621,
+      "Reduced mucosal view": 291,
+      "Pylorus": 230,
+      "Angiectasia": 108,
+      "Ulcer": 145,
+      "Foreign body": 180,
+      "Erosion": 36,
+      "Lymphangiectasia": 150,
+      "Erythema": 27
+    },
+    "Test": {
+      "Normal clean mucosa": 4408,
+      "Ileocecal valve": 662,
+      "Reduced mucosal view": 624,
+      "Pylorus": 219,
+      "Angiectasia": 74,
+      "Ulcer": 127,
+      "Foreign body": 23,
+      "Erosion": 64,
+      "Lymphangiectasia": 74,
+      "Erythema": 9
     }
   },
   "split_balance": {
     "counts": {
-      "CV fold 0": {
-        "Angiectasia": 760,
-        "Blood - fresh": 22,
-        "Erosion": 81,
-        "Erythema": 36,
-        "Foreign body": 203,
-        "Ileocecal valve": 2408,
-        "Lymphangiectasia": 224,
-        "Normal clean mucosa": 10556,
-        "Pylorus": 578,
-        "Reduced mucosal view": 762,
-        "Ulcer": 272
-      },
-      "CV fold 1": {
-        "Angiectasia": 67,
-        "Blood - fresh": 424,
-        "Erosion": 377,
-        "Erythema": 0,
-        "Foreign body": 0,
-        "Ileocecal valve": 902,
-        "Lymphangiectasia": 368,
-        "Normal clean mucosa": 14755,
-        "Pylorus": 519,
-        "Reduced mucosal view": 1974,
-        "Ulcer": 582
-      },
-      "Test": {
-        "Angiectasia": 39,
-        "Blood - fresh": 0,
-        "Erosion": 48,
+      "Train": {
+        "Angiectasia": 684,
+        "Erosion": 406,
         "Erythema": 123,
         "Foreign body": 573,
-        "Ileocecal valve": 879,
-        "Lymphangiectasia": 0,
-        "Normal clean mucosa": 9027,
-        "Pylorus": 432,
-        "Reduced mucosal view": 170,
-        "Ulcer": 0
+        "Ileocecal valve": 2906,
+        "Lymphangiectasia": 368,
+        "Normal clean mucosa": 24137,
+        "Pylorus": 1080,
+        "Reduced mucosal view": 1991,
+        "Ulcer": 582
+      },
+      "Val": {
+        "Angiectasia": 108,
+        "Erosion": 36,
+        "Erythema": 27,
+        "Foreign body": 180,
+        "Ileocecal valve": 621,
+        "Lymphangiectasia": 150,
+        "Normal clean mucosa": 5793,
+        "Pylorus": 230,
+        "Reduced mucosal view": 291,
+        "Ulcer": 145
+      },
+      "Test": {
+        "Angiectasia": 74,
+        "Erosion": 64,
+        "Erythema": 9,
+        "Foreign body": 23,
+        "Ileocecal valve": 662,
+        "Lymphangiectasia": 74,
+        "Normal clean mucosa": 4408,
+        "Pylorus": 219,
+        "Reduced mucosal view": 624,
+        "Ulcer": 127
       }
     },
     "proportions_pct": {
-      "CV fold 0": {
-        "Angiectasia": 87.8,
-        "Blood - fresh": 4.9,
-        "Erosion": 16.0,
-        "Erythema": 22.6,
-        "Foreign body": 26.2,
-        "Ileocecal valve": 57.5,
-        "Lymphangiectasia": 37.8,
-        "Normal clean mucosa": 30.7,
-        "Pylorus": 37.8,
-        "Reduced mucosal view": 26.2,
-        "Ulcer": 31.9
-      },
-      "CV fold 1": {
-        "Angiectasia": 7.7,
-        "Blood - fresh": 95.1,
-        "Erosion": 74.5,
-        "Erythema": 0.0,
-        "Foreign body": 0.0,
-        "Ileocecal valve": 21.5,
-        "Lymphangiectasia": 62.2,
-        "Normal clean mucosa": 43.0,
-        "Pylorus": 33.9,
-        "Reduced mucosal view": 67.9,
-        "Ulcer": 68.1
-      },
-      "Test": {
-        "Angiectasia": 4.5,
-        "Blood - fresh": 0.0,
-        "Erosion": 9.5,
+      "Train": {
+        "Angiectasia": 79.0,
+        "Erosion": 80.2,
         "Erythema": 77.4,
         "Foreign body": 73.8,
-        "Ileocecal valve": 21.0,
-        "Lymphangiectasia": 0.0,
-        "Normal clean mucosa": 26.3,
-        "Pylorus": 28.3,
-        "Reduced mucosal view": 5.8,
-        "Ulcer": 0.0
+        "Ileocecal valve": 69.4,
+        "Lymphangiectasia": 62.2,
+        "Normal clean mucosa": 70.3,
+        "Pylorus": 70.6,
+        "Reduced mucosal view": 68.5,
+        "Ulcer": 68.1
+      },
+      "Val": {
+        "Angiectasia": 12.5,
+        "Erosion": 7.1,
+        "Erythema": 17.0,
+        "Foreign body": 23.2,
+        "Ileocecal valve": 14.8,
+        "Lymphangiectasia": 25.3,
+        "Normal clean mucosa": 16.9,
+        "Pylorus": 15.0,
+        "Reduced mucosal view": 10.0,
+        "Ulcer": 17.0
+      },
+      "Test": {
+        "Angiectasia": 8.5,
+        "Erosion": 12.6,
+        "Erythema": 5.7,
+        "Foreign body": 3.0,
+        "Ileocecal valve": 15.8,
+        "Lymphangiectasia": 12.5,
+        "Normal clean mucosa": 12.8,
+        "Pylorus": 14.3,
+        "Reduced mucosal view": 21.5,
+        "Ulcer": 14.9
       }
     },
-    "missing_from_any_fold": {
-      "Blood - fresh": [
-        "Test"
-      ],
-      "Erythema": [
-        "CV fold 1"
-      ],
-      "Foreign body": [
-        "CV fold 1"
-      ],
-      "Lymphangiectasia": [
-        "Test"
-      ],
-      "Ulcer": [
-        "Test"
-      ]
-    }
+    "missing_from_any_split": {}
   },
   "binary_counts_by_fold": {
-    "0": {
-      "Normal": 14304,
-      "Suspicious": 1598
+    "Train": {
+      "Normal": 30114,
+      "Suspicious": 2736
     },
-    "1": {
-      "Normal": 18150,
-      "Suspicious": 1818
+    "Val": {
+      "Normal": 6935,
+      "Suspicious": 646
     },
-    "2": {
-      "Normal": 10508,
-      "Suspicious": 783
+    "Test": {
+      "Normal": 5913,
+      "Suspicious": 371
     }
   },
   "intra_video_duplication": {
     "n_videos": 43,
-    "n_frames": 47161,
-    "median_frames_per_video": 1002.0,
+    "n_frames": 46715,
+    "median_frames_per_video": 1000.0,
     "p90_frames_per_video": 2012.6000000000001,
     "p99_frames_per_video": 2295.2999999999997,
     "max_frames_per_video": 2394,
@@ -178,58 +191,85 @@
   "exclusion_impact": {
     "excluded_classes": {
       "Ampulla of Vater": 10,
-      "Blood - hematin": 12
+      "Blood - fresh": 446,
+      "Blood - hematin": 12,
+      "Polyp": 55
     },
-    "total_excluded": 22,
-    "total_active": 47161,
-    "n_missing_from_official_splits": 55
+    "total_excluded": 523,
+    "total_active": 46715
   },
   "bbox_area": {
-    "n": 4115,
-    "p10": 0.0172991071428571,
-    "median": 0.046281533446712,
-    "p90": 0.350892857142857,
+    "n": 3720,
+    "p10": 0.0167056405895691,
+    "median": 0.04221141581632645,
+    "p90": 0.1294678287981859,
     "first_block_downsampling_should_be_removed": true
   },
   "normalization_stats": {
-    "all": {
+    "train": {
       "mean": [
-        0.6023374041312549,
-        0.36897971136509816,
-        0.1857726315369089
+        0.6029480562192047,
+        0.369929941537287,
+        0.18638786076187555
       ],
       "std": [
-        0.18309429097387567,
-        0.13548931521377197,
-        0.0913124561161489
+        0.1813843834104082,
+        0.13227436299372275,
+        0.09027251296739751
       ],
-      "n_pixels": 4050957824
+      "n_pixels": 3708623360
+    },
+    "val": {
+      "mean": [
+        0.5933922997403672,
+        0.37757816433995267,
+        0.19238293197139322
+      ],
+      "std": [
+        0.17928014595194094,
+        0.14061321759649215,
+        0.09881097776935505
+      ],
+      "n_pixels": 826305355
+    },
+    "test": {
+      "mean": [
+        0.5964837985698179,
+        0.35761783299508487,
+        0.19269336682753724
+      ],
+      "std": [
+        0.19811650904448616,
+        0.14722530198823408,
+        0.10144418717335181
+      ],
+      "n_pixels": 741724672
     },
     "fold_0": {
       "mean": [
-        0.6037055901457978,
-        0.36502275856959476,
-        0.18396870811761123
+        0.6029480562192047,
+        0.369929941537287,
+        0.18638786076187555
       ],
       "std": [
-        0.18897844333772523,
-        0.13806908391364306,
-        0.09105099801204544
+        0.1813843834104082,
+        0.13227436299372275,
+        0.09027251296739751
       ],
-      "n_pixels": 1825783808
+      "n_pixels": 3708623360
     },
     "fold_1": {
       "mean": [
-        0.6012147899654762,
-        0.37222644186397313,
-        0.18725277382966574
+        0.5933922997403672,
+        0.37757816433995267,
+        0.19238293197139322
       ],
       "std": [
-        0.1781133000774548,
-        0.1332475738917824,
-        0.09149986961377919
+        0.17928014595194094,
+        0.14061321759649215,
+        0.09881097776935505
       ],
-      "n_pixels": 2225174016
+      "n_pixels": 826305355
     }
   }
 }

@@ -1,0 +1,47 @@
+{
+  "n_images": 4995,
+  "n_models_ensembled": 1,
+  "metrics_at_0.5": {
+    "pr_auc": 0.15420527274369647,
+    "mcc": -0.016068491023280132,
+    "npv": 0.8574197120708749,
+    "tp": 180,
+    "fp": 1203,
+    "tn": 3097,
+    "fn": 515
+  },
+  "metrics_at_calibrated_threshold": {
+    "threshold": 0.14525525525525526,
+    "tp": 631,
+    "tn": 413,
+    "fp": 3887,
+    "fn": 64,
+    "npv": 0.8658,
+    "precision": 0.1397,
+    "recall": 0.9079
+  },
+  "subclass_recall": {
+    "Angiectasia": 0.0,
+    "Erosion": 0.59375,
+    "Erythema": 0.34146341463414637,
+    "Foreign body": 0.5,
+    "Lymphangiectasia": 0.22826086956521738,
+    "Ulcer": 0.2206896551724138
+  },
+  "subclass_recall_at_calibrated_threshold": {
+    "Angiectasia": 0.8095238095238095,
+    "Erosion": 0.96875,
+    "Erythema": 0.959349593495935,
+    "Foreign body": 0.8333333333333334,
+    "Lymphangiectasia": 0.967391304347826,
+    "Ulcer": 0.7172413793103448
+  },
+  "speed": {
+    "images": 4995,
+    "total_seconds": 64.77,
+    "images_per_sec": 77.1
+  },
+  "run_dirs": [
+    "outputs/runs/densenet161_scratch_full_fold0"
+  ]
+}

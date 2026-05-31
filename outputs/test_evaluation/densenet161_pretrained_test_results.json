@@ -1,0 +1,47 @@
+{
+  "n_images": 4995,
+  "n_models_ensembled": 1,
+  "metrics_at_0.5": {
+    "pr_auc": 0.5096642776726409,
+    "mcc": 0.40043616933290405,
+    "npv": 0.892872205820329,
+    "tp": 187,
+    "fp": 66,
+    "tn": 4234,
+    "fn": 508
+  },
+  "metrics_at_calibrated_threshold": {
+    "threshold": 0.014784784784784785,
+    "tp": 672,
+    "tn": 1401,
+    "fp": 2899,
+    "fn": 23,
+    "npv": 0.9838,
+    "precision": 0.1882,
+    "recall": 0.9669
+  },
+  "subclass_recall": {
+    "Angiectasia": 0.9047619047619048,
+    "Erosion": 0.25,
+    "Erythema": 0.21951219512195122,
+    "Foreign body": 0.0,
+    "Lymphangiectasia": 0.21467391304347827,
+    "Ulcer": 0.3724137931034483
+  },
+  "subclass_recall_at_calibrated_threshold": {
+    "Angiectasia": 0.9523809523809523,
+    "Erosion": 1.0,
+    "Erythema": 0.959349593495935,
+    "Foreign body": 0.8333333333333334,
+    "Lymphangiectasia": 0.970108695652174,
+    "Ulcer": 0.9655172413793104
+  },
+  "speed": {
+    "images": 4995,
+    "total_seconds": 65.04,
+    "images_per_sec": 76.8
+  },
+  "run_dirs": [
+    "outputs/runs/densenet161_pretrained_full_fold0"
+  ]
+}
