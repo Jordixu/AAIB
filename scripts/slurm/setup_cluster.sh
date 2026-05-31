@@ -16,8 +16,8 @@ echo "Creating .venv on top of aabi (inherits torch, numpy, pandas, ...)..."
 python -m venv --system-site-packages "$PROJECT_ROOT/.venv"
 source "$PROJECT_ROOT/.venv/bin/activate"
 
-echo "Installing albumentations (not in aabi)..."
-pip install -q albumentations
+echo "Installing albumentations and grad-cam (not in aabi)..."
+pip install -q albumentations grad-cam
 
 echo "Installing kvasir_triage package (no extra deps, aabi has them)..."
 pip install -q --no-deps -e .

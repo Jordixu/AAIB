@@ -1,4 +1,4 @@
-"""Phase 6 interpretability audit: Grad-CAM on True Positives."""
+"""Phase 6 interpretability audit: Grad-CAM on selected validation outcomes."""
 import argparse
 import sys
 from pathlib import Path
@@ -12,6 +12,7 @@ import yaml
 from torch.utils.data import DataLoader
 
 from kvasir_triage.config import load_config
+from kvasir_triage.data.bboxes import load_bbox_annotations
 from kvasir_triage.data.dataset import KvasirNPZShardDataset
 from kvasir_triage.data.dataloaders import make_dataloaders
 from kvasir_triage.data.splits import VAL_SPLIT, add_split_column
@@ -60,8 +61,20 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("run_dir", type=Path)
     parser.add_argument("--max-samples", type=int, default=200)
+    parser.add_argument(
+        "--max-samples-per-class",
+        type=int,
+        default=None,
+        help="Maximum examples generated for each subclass. False-negative default: 3.",
+    )
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--threshold", type=float, default=0.5)
+    parser.add_argument(
+        "--outcome",
+        choices=["true-positive", "false-negative"],
+        default="true-positive",
+        help="Prediction outcome to audit. Default: true-positive.",
+    )
     parser.add_argument(
         "--subclass",
         type=str,
@@ -94,6 +107,16 @@ def main():
     if not mf.exists():
         mf = outputs_root().parent / "outputs_phase1_2_3" / "preprocessed_manifest.csv"
     df = add_split_column(pd.read_csv(mf))
+    metadata_csv = outputs_root().parent / "data" / "metadata.csv"
+    if not metadata_csv.exists():
+        raise FileNotFoundError(
+            f"Boundary-box metadata not found at {metadata_csv}. "
+            "Copy data/metadata.csv to the project before running Grad-CAM."
+        )
+    bbox_annotations = load_bbox_annotations(metadata_csv)
+    if bbox_annotations.empty:
+        raise RuntimeError(f"No boundary-box coordinates found in {metadata_csv}.")
+    df["bbox_annotations"] = df["stem"].map(bbox_annotations).fillna("[]")
     if args.subclass:
         df = df[df["subclass"] == args.subclass].reset_index(drop=True)
         if df.empty:
@@ -136,9 +159,14 @@ def main():
         _, val_loader = make_dataloaders(df, train_fold, loader_cfg)
 
     out_dir = run_dir / "gradcam"
+    if args.outcome != "true-positive":
+        out_dir = out_dir / args.outcome.replace("-", "_")
     if args.subclass:
         safe_subclass = args.subclass.lower().replace(" ", "_").replace("/", "_")
         out_dir = out_dir / safe_subclass
+    max_samples_per_class = args.max_samples_per_class
+    if max_samples_per_class is None and args.outcome == "false-negative":
+        max_samples_per_class = 3
     csv_path = run_gradcam_audit(
         model,
         cfg["model"],
@@ -149,6 +177,8 @@ def main():
         mean=mean,
         std=std,
         threshold=args.threshold,
+        outcome=args.outcome,
+        max_samples_per_class=max_samples_per_class,
     )
 
     # compute summary stats
@@ -158,12 +188,16 @@ def main():
     masses = [float(r["activation_mass"]) for r in rows if r["activation_mass"] not in ("", "None")]
     if masses:
         stats = {"mean_activation_mass": float(np.mean(masses)), "n_samples": len(masses)}
-        save_json(stats, run_dir / "gradcam" / "activation_mass_stats.json")
+        save_json(stats, out_dir / "activation_mass_stats.json")
         log.info("Mean activation mass: %.3f (n=%d)", stats["mean_activation_mass"], stats["n_samples"])
     else:
         log.warning("No activation mass computed (bbox masks are not available in the current dataset).")
     if not rows:
-        log.warning("No true positives found at threshold %.3f; no thumbnails were generated.", args.threshold)
+        log.warning(
+            "No %s cases found at threshold %.3f; no thumbnails were generated.",
+            args.outcome,
+            args.threshold,
+        )
 
     log.info("Grad-CAM results: %s", out_dir)
 

@@ -2,13 +2,15 @@
 from __future__ import annotations
 
 import csv
+import json
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import torch
 import torch.nn as nn
-from PIL import Image
+from PIL import Image, ImageDraw
 
 try:
     from pytorch_grad_cam import GradCAM
@@ -60,6 +62,62 @@ def _denormalize_image(img: torch.Tensor, mean: list[float], std: list[float]) -
     return np.clip((img_np * std_arr) + mean_arr, 0.0, 1.0)
 
 
+def _parse_bbox_annotations(value: Any) -> list[list[list[float]]]:
+    """Return normalized polygons from the JSON value carried by the dataset."""
+    if not isinstance(value, str) or not value:
+        return []
+    try:
+        annotations = json.loads(value)
+    except json.JSONDecodeError:
+        return []
+    return annotations if isinstance(annotations, list) else []
+
+
+def _polygon_pixels(
+    polygon: list[list[float]],
+    width: int,
+    height: int,
+) -> list[tuple[int, int]]:
+    return [
+        (
+            int(round(float(x) * (width - 1))),
+            int(round(float(y) * (height - 1))),
+        )
+        for x, y in polygon
+    ]
+
+
+def _bbox_mask(
+    annotations: list[list[list[float]]],
+    width: int,
+    height: int,
+) -> np.ndarray | None:
+    if not annotations:
+        return None
+    mask = Image.new("L", (width, height), 0)
+    draw = ImageDraw.Draw(mask)
+    for polygon in annotations:
+        draw.polygon(_polygon_pixels(polygon, width, height), fill=255)
+    return np.array(mask, dtype=bool)
+
+
+def _draw_bbox_boundaries(
+    image: np.ndarray,
+    annotations: list[list[list[float]]],
+) -> np.ndarray:
+    """Draw the original dataset boundaries over a Grad-CAM RGB image."""
+    rendered = Image.fromarray(image)
+    draw = ImageDraw.Draw(rendered)
+    for polygon in annotations:
+        points = _polygon_pixels(polygon, rendered.width, rendered.height)
+        if not points:
+            continue
+        closed = [*points, points[0]]
+        draw.line(closed, fill=(0, 0, 0), width=5, joint="curve")
+        draw.line(closed, fill=(80, 255, 80), width=3, joint="curve")
+    return np.array(rendered)
+
+
 def run_gradcam_audit(
     model: nn.Module,
     model_name: str,
@@ -70,10 +128,14 @@ def run_gradcam_audit(
     mean: list[float] | None = None,
     std: list[float] | None = None,
     threshold: float = 0.5,
+    outcome: str = "true-positive",
+    max_samples_per_class: int | None = None,
 ) -> Path:
-    """Run Grad-CAM on True Positives with bboxes. Saves CSV + thumbnails."""
+    """Run Grad-CAM on selected positive-label outcomes. Saves CSV + thumbnails."""
     if not _GRADCAM_AVAILABLE:
         raise RuntimeError("Install grad-cam: pip install grad-cam")
+    if outcome not in {"true-positive", "false-negative"}:
+        raise ValueError(f"Unsupported Grad-CAM outcome: {outcome}")
 
     target_layer = _get_target_layer(model, model_name)
     cam = GradCAM(model=model, target_layers=[target_layer])
@@ -81,8 +143,11 @@ def run_gradcam_audit(
     out_dir.mkdir(parents=True, exist_ok=True)
     thumb_dir = out_dir / "thumbnails"
     thumb_dir.mkdir(exist_ok=True)
+    for old_thumbnail in thumb_dir.glob("*.jpg"):
+        old_thumbnail.unlink()
 
     rows: list[dict[str, Any]] = []
+    selected_per_subclass: dict[str, int] = defaultdict(int)
     n = 0
     mean = mean or [0.0, 0.0, 0.0]
     std = std or [1.0, 1.0, 1.0]
@@ -100,32 +165,61 @@ def run_gradcam_audit(
         for i in range(len(imgs)):
             lbl = int(labels[i])
             pred = preds[i]
-            if lbl != 1 or pred != 1:
-                continue  # only True Positives
+            is_selected = (
+                (outcome == "true-positive" and lbl == 1 and pred == 1)
+                or (outcome == "false-negative" and lbl == 1 and pred == 0)
+            )
+            if not is_selected:
+                continue
+            subclass = meta["subclass"][i]
+            if (
+                max_samples_per_class is not None
+                and selected_per_subclass[subclass] >= max_samples_per_class
+            ):
+                continue
+            annotations = _parse_bbox_annotations(meta["bbox_annotations"][i])
+            if not annotations:
+                continue
 
             inp = imgs[i:i+1].to(device)
             heatmap = cam(input_tensor=inp, targets=targets)[0]  # (H, W)
 
-            mass = None  # bbox masks not available at this stage
+            bbox_mask = _bbox_mask(annotations, heatmap.shape[1], heatmap.shape[0])
+            mass = compute_activation_mass(heatmap, bbox_mask)
 
             row = {
-                "subclass": meta["subclass"][i],
+                "subclass": subclass,
                 "rel_path": meta["rel_path"][i],
                 "prob": float(probs[i]),
+                "outcome": outcome,
+                "bbox_count": len(annotations),
                 "activation_mass": mass,
             }
 
             # save thumbnail
             img_np = _denormalize_image(imgs[i], mean, std)
             vis = show_cam_on_image(img_np.astype(np.float32), heatmap, use_rgb=True)
-            fname = thumb_dir / f"tp_{n:04d}.jpg"
+            vis = _draw_bbox_boundaries(vis, annotations)
+            prefix = "tp" if outcome == "true-positive" else "fn"
+            safe_subclass = subclass.lower().replace(" ", "_").replace("/", "_")
+            class_idx = selected_per_subclass[subclass]
+            fname = thumb_dir / f"{prefix}_{safe_subclass}_{class_idx:02d}.jpg"
             Image.fromarray(vis).save(fname)
             row["thumbnail_path"] = str(fname.relative_to(out_dir))
             rows.append(row)
+            selected_per_subclass[subclass] += 1
             n += 1
 
     csv_path = out_dir / "activation_mass.csv"
-    fieldnames = ["subclass", "rel_path", "prob", "activation_mass", "thumbnail_path"]
+    fieldnames = [
+        "subclass",
+        "rel_path",
+        "prob",
+        "outcome",
+        "bbox_count",
+        "activation_mass",
+        "thumbnail_path",
+    ]
     with open(csv_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
