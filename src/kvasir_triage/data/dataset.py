@@ -24,6 +24,7 @@ def _meta_from_row(row) -> dict[str, Any]:
         "shard_rel_path",
         "local_idx",
         "bbox_norm_area",
+        "bbox_annotations",
     ]
     meta = {key: row.get(key, "") for key in keys}
     meta["fold"] = int(row["fold"])
