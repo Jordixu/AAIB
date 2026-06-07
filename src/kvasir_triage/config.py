@@ -40,8 +40,3 @@ def load_config(config_path: Path | str, overrides: dict[str, Any] | None = None
         cfg = _deep_merge(cfg, overrides)
 
     return cfg
-
-
-def config_from_name(name: str, overrides: dict[str, Any] | None = None) -> dict:
-    """Load configs/<name>.yaml merged on top of base.yaml."""
-    return load_config(configs_root() / f"{name}.yaml", overrides)

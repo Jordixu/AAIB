@@ -46,8 +46,10 @@ Thumbs.db
 #original repo
 data/kvasir-capsule/
 
-# Datafiles are too large to track
-/data/
+# Datafiles are too large to track, except the small demo sample (ships with
+# the repo so run_demo.ipynb has something to load on a fresh clone / Colab)
+/data/*
+!/data/demo_sample/
 
 # Pretrained weights (download locally with scripts/download_weights.py, then upload to cluster)
 weights/hub/

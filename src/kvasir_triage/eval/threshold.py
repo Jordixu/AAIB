@@ -20,10 +20,10 @@ def find_threshold_by_recall(
     and status reflects which constraint is binding.
 
     Returns a dict with:
-        threshold  – selected threshold (or None if target_recall is unreachable)
-        recall     – recall at selected threshold
-        precision  – precision at selected threshold
-        status     – "ok" | "precision_not_achievable" | "recall_not_achievable"
+        threshold  - selected threshold (or None if target_recall is unreachable)
+        recall     - recall at selected threshold
+        precision  - precision at selected threshold
+        status     - "ok" | "precision_not_achievable" | "recall_not_achievable"
     """
     probs = 1 / (1 + np.exp(-logits))
 
@@ -63,7 +63,7 @@ def find_threshold_by_recall(
             "status": "ok",
         }
 
-    # Recall-only feasible — precision floor is blocking the dual constraint.
+    # Recall-only feasible (precision floor is blocking the dual constraint).
     # Return the most selective threshold that still hits target_recall, and flag it.
     recall_only = recalls >= target_recall
     if recall_only.any():
@@ -78,7 +78,7 @@ def find_threshold_by_recall(
             "status": "precision_not_achievable",
         }
 
-    # Neither constraint is satisfiable — return the threshold with highest recall.
+    # Neither constraint is satisfiable - return the threshold with highest recall.
     best_idx = int(recalls.argmax())
     r, p = metrics_at(float(thresholds[best_idx]))
     return {

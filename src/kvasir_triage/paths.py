@@ -11,10 +11,6 @@ def project_root() -> Path:
     raise RuntimeError("pyproject.toml not found - are you inside the project?")
 
 
-def data_root() -> Path:
-    return project_root() / "data"
-
-
 def outputs_root() -> Path:
     return project_root() / "outputs"
 

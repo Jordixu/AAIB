@@ -294,7 +294,7 @@ def main():
                     log.debug("  Skipping existing shard: %s", shard_name)
                 else:
                     log.warning(
-                        "  Shard %s exists but has %d images; batch has %d — re-writing.",
+                        "  Shard %s exists but has %d images; batch has %d, re-writing.",
                         shard_name, len(existing["images"]), len(batch),
                     )
             if not skip:

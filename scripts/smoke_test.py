@@ -32,6 +32,7 @@ IMAGENET_STD = [0.229, 0.224, 0.225]
 
 def make_synthetic_loader(n: int, label_frac: float = 0.5, batch_size: int = 16):
     """Random uint8 images, 336x336x3, stratified labels."""
+    # 336 to match the real preprocessing output - keeps the transform pipeline honest
     imgs = np.random.randint(0, 255, (n, 336, 336, 3), dtype=np.uint8)
     labels = np.array([1 if i < int(n * label_frac) else 0 for i in range(n)], dtype=np.int64)
     np.random.shuffle(labels)

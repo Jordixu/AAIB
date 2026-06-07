@@ -8,13 +8,6 @@ import numpy as np
 import pandas as pd
 
 
-def _meta_value(meta: dict[str, list[Any]], key: str, idx: int, default: Any = "") -> Any:
-    values = meta.get(key)
-    if values is None:
-        return default
-    return values[idx]
-
-
 def _gradcam_lookup(run_dir: Path) -> dict[str, dict[str, Any]]:
     rows: dict[str, dict[str, Any]] = {}
     gradcam_root = run_dir / "gradcam"

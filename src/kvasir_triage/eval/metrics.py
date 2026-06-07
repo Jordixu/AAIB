@@ -13,7 +13,7 @@ from sklearn.metrics import (
 def compute_metrics(
     logits: np.ndarray,
     labels: np.ndarray,
-    threshold: float = 0.5,
+    threshold: float = 0.5,  # just the reporting default - evaluate.py calibrates the real one
 ) -> dict[str, float]:
     probs = expit(logits)
     preds = (probs >= threshold).astype(int)

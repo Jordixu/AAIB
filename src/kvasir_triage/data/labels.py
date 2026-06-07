@@ -19,6 +19,7 @@ DIR_NAME_MAP: dict[str, str] = {
 }
 
 # All subclasses present in Kvasir-Capsule labelled_images
+# (listed in the order the raw folders came in, not alphabetical - doesn't matter functionally)
 CANONICAL_LABELS = [
     "Angiectasia",
     "Blood - fresh",

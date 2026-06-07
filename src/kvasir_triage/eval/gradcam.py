@@ -211,18 +211,19 @@ def run_gradcam_audit(
             n += 1
 
     csv_path = out_dir / "activation_mass.csv"
-    fieldnames = [
-        "subclass",
-        "rel_path",
-        "prob",
-        "outcome",
-        "bbox_count",
-        "activation_mass",
-        "thumbnail_path",
-    ]
-    with open(csv_path, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
+    if rows:
+        fieldnames = [
+            "subclass",
+            "rel_path",
+            "prob",
+            "outcome",
+            "bbox_count",
+            "activation_mass",
+            "thumbnail_path",
+        ]
+        with open(csv_path, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
 
     return csv_path

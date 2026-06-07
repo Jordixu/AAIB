@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterator
 
 import numpy as np
 from PIL import Image
@@ -24,15 +23,6 @@ def preprocess_image_to_uint8(
     if mask is None:
         mask = make_corner_polygon_mask(target_size)
     return apply_mask(arr, mask)
-
-
-def iter_shards(
-    rows: list[dict],
-    shard_size: int = SHARD_SIZE,
-) -> Iterator[tuple[int, list[dict]]]:
-    """Yield (shard_idx, batch_of_rows) without loading images."""
-    for i in range(0, len(rows), shard_size):
-        yield i // shard_size, rows[i:i + shard_size]
 
 
 def write_npz_shard(

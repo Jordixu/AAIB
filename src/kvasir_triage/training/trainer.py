@@ -126,7 +126,7 @@ def train(
 
     max_epochs = cfg.get("max_epochs", 50)
     max_batches = cfg.get("max_batches", None)  # for quick tests
-    grad_clip = cfg.get("grad_clip", 1.0)
+    grad_clip = cfg.get("grad_clip", 1.0)  # textbook value, never had a reason to touch it
     log_interval = cfg.get("log_interval", 20)  # batches between progress lines
 
     n_batches = len(train_loader)

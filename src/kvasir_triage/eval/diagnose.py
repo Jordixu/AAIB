@@ -7,7 +7,9 @@ from typing import Any
 from kvasir_triage.utils import load_json, save_json
 
 
-# Thresholds that define the three paths
+# Thresholds that define the three paths.
+# Picked from what "good enough to show a clinician" looked like in practice,
+# not derived from a formula - revisit if the operating point moves.
 PR_AUC_THRESHOLD = 0.85
 NPV_THRESHOLD = 0.95
 ACTIVATION_MASS_THRESHOLD = 0.5  # fraction of CAM in bbox to be considered "attending"

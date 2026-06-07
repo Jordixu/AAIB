@@ -12,6 +12,8 @@ class BinaryFocalLoss(nn.Module):
 
     def __init__(self, gamma: float = 2.0, alpha: float | None = 0.25) -> None:
         super().__init__()
+        # 2.0 / 0.25 are the values from the focal loss paper - tried tuning
+        # them once on a held-out sweep, didn't beat the defaults, left as-is
         self.gamma = gamma
         self.alpha = alpha
 
