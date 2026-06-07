@@ -1,4 +1,3 @@
-"""Phase 6 interpretability audit: Grad-CAM on selected validation outcomes."""
 import argparse
 import sys
 from pathlib import Path

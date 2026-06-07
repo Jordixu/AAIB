@@ -4,27 +4,8 @@ from __future__ import annotations
 import numpy as np
 
 
-def find_threshold_by_recall(
-    logits: np.ndarray,
-    labels: np.ndarray,
-    target_recall: float = 0.90,
-    min_precision: float = 0.10,
-    n_coarse: int = 99,
-    n_fine: int = 1000,
-) -> dict:
-    """Find the maximum threshold t such that recall(t) >= target_recall.
-
-    min_precision acts as a regularizer against class collapse: if the only way
-    to achieve target_recall is to predict everything as positive (driving
-    precision below min_precision), the dual constraint blocks that solution
-    and status reflects which constraint is binding.
-
-    Returns a dict with:
-        threshold  - selected threshold (or None if target_recall is unreachable)
-        recall     - recall at selected threshold
-        precision  - precision at selected threshold
-        status     - "ok" | "precision_not_achievable" | "recall_not_achievable"
-    """
+def find_threshold_by_recall(logits: np.ndarray, labels: np.ndarray, target_recall: float = 0.90, min_precision: float = 0.10, n_coarse: int = 99, n_fine: int = 1000) -> dict:
+    """Find the maximum threshold t such that recall(t) >= target_recall."""
     probs = 1 / (1 + np.exp(-logits))
 
     def metrics_at(t):

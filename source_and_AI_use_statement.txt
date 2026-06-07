@@ -1,0 +1,93 @@
+Source and AI Use Statement
+===========================
+
+1. Parts of the code we wrote ourselves
+---------------------
+
+NOTE: Although we state here that these code were made by us, they underwent code review by the AI, so probably some changes from our initial code was made.
+
+Mostly the small, self-contained, "look it up and write it" pieces, plus everything that
+encodes our own project decisions (labels, configs, pipeline design):
+- seeding.py, paths.py, utils.py - small utility modules
+- labels.py - the Kvasir subclass -> binary (Normal/Suspicious) mapping and excluded-class
+  list, which encodes our own labelling decisions rather than an algorithm
+- config.py
+- metrics.py - metric calculation, built directly on top of sklearn/scipy (PR-AUC, MCC, NPV,
+  per-subclass recall)
+- early_stop.py, checkpoint.py
+- the model backbones (densenet.py, efficientnet.py, mobilenet.py); written by hand first,
+  then improved with AI help (see section 4)
+- all of configs/*.yaml
+- the overall design of the pipeline (how preprocessing, training, evaluation, cross-val,
+  diagnosis and Grad-CAM fit together)
+- the template/design for the EDA and results notebooks (the notebooks themselves were then
+  produced with AI help, see section 4)
+
+2. Parts that came from external sources (tutorials, repos, baselines, libraries, papers, previous code...)
+---------------------
+- The local (focal) loss is readapted from torchvision's implementation:
+  https://docs.pytorch.org/vision/main/_modules/torchvision/ops/focal_loss.html
+- The batch files are based on the example file provided in Aula Global
+- The training loop's structure (training loop, early stopping, optimizers, checkpointing)
+  comes from our previous projects
+- Grad-CAM relies on the pytorch-grad-cam library (GradCAM, BinaryClassifierOutputTarget,
+  show_cam_on_image)
+- General use of established libraries for their intended purpose: torchvision (model
+  backbones, weights), albumentations (augmentations/TTA), scikit-learn/scipy (metrics),
+  pandas/numpy (data handling), Weights & Biases (experiment tracking)
+
+3. Whether we used ChatGPT, Copilot, or similar tools
+---------------------
+Yes. We used ChatGPT/Codex and Claude Code throughout the project. Also Github Copilot for simpler tasks
+
+4. What those tools were used for
+---------------------
+Mainly the more involved, multi-part, or fiddly pieces of the pipeline, where we designed
+the requirements/behaviour and AI helped turn that into working code, plus general support
+(debugging, readability/performance improvements, code adaptation, understanding concepts,
+connecting different parts of the code):
+- splits.py - the subclass-stratified, video-grouped train/val/test split assignment
+  (hash-based deterministic ordering, rare-class handling, leakage-avoidance logic)
+- dataset.py / dataloaders.py - the LRU-cached NPZ-shard dataset, the in-memory dataset,
+  weighted-sampler wiring, and the train/val leakage check
+- transforms.py - the augmentation pipeline (albumentations) and the 8-way deterministic
+  TTA variant generation
+- trainer.py - the full training loop: AMP/grad-scaler, gradient clipping, the two-phase
+  freeze/unfreeze fine-tuning schedule, optimizer/scheduler wiring, resuming from
+  checkpoints, validation-output collection, and hooking in metrics/logging/reports
+- gradcam.py - the Grad-CAM audit module: wiring up the pytorch-grad-cam library, building
+  bbox masks from the dataset annotations, computing activation mass, and rendering
+  thumbnails with overlaid annotation boundaries
+- threshold.py - the dual-constraint threshold search (recall+precision anchored, and
+  NPV-anchored) with coarse-to-fine refinement
+- diagnose.py - the Path A/B/C classification logic and operating-envelope construction
+- suspicious_report.py, crossval.py - the suspicious-frame report and cross-fold metric
+  aggregation builders
+- preprocess.py - the resize/mask/uint8/NPZ-shard preprocessing pipeline
+- tracking/ (hardware.py, jsonl_logger.py, wandb_logger.py) - hardware snapshotting and
+  the JSONL/W&B logging wrappers
+- bboxes.py - parsing the Kvasir bounding-box metadata into normalized polygons
+- adapting the Aula Global batch file example to our project, and improving the model
+  backbones, evaluation scripts, and EDA/results notebooks we had started ourselves
+
+5. What we checked, modified, or verified ourselves
+-------------------------------------------------------
+- We designed the overall pipeline, the configs, and the label mapping ourselves; all
+  AI-produced or AI-adapted code had to fit that design and those decisions
+- We verified the split assignment (splits.py) against the manifest - in particular that
+  there is no train/val/test leakage and that subclass proportions look right
+- We ran training end-to-end and checked loss curves, validation PR-AUC/MCC/NPV, and
+  checkpoint/resume behaviour against what we expected from our previous projects
+- We chose and (lightly) tuned the focal-loss gamma/alpha and the Grad-CAM target layer per
+  backbone, and checked that the resulting heatmaps and activation-mass numbers made sense
+- We checked that the Grad-CAM thumbnails, suspicious-frame reports, cross-validation
+  summaries, and EDA/results notebooks reflected the actual data and the results we expected
+- We adapted and re-ran the AI-adapted batch file example for each of our models on the
+  cluster
+
+6. Parts of the code we do not fully understand
+---------------------------------------------------
+- The internals of the pytorch-grad-cam library (used in src/kvasir_triage/eval/gradcam.py):
+  specifically how GradCAM hooks the target layer and backpropagates gradients to build the
+  activation heatmap, and how BinaryClassifierOutputTarget shapes that backward pass for a
+  single-logit binary head.

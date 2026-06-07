@@ -16,7 +16,7 @@ def make_corner_polygon_mask(size: int = 336) -> np.ndarray:
 
     c = size / 2
     r = size / 2
-    # octagon approximation - same corner cut fraction as notebook
+    # octagon approximation
     d = r * (1 - 1 / np.sqrt(2)) * 0.55
     polygon = [
         (d, 0), (size - d, 0),

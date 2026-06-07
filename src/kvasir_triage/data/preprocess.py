@@ -11,11 +11,7 @@ from kvasir_triage.data.masks import make_corner_polygon_mask, apply_mask
 TARGET_SIZE = 336
 SHARD_SIZE = 512
 
-def preprocess_image_to_uint8(
-    image_path: Path | str,
-    mask: np.ndarray | None = None,
-    target_size: int = TARGET_SIZE,
-) -> np.ndarray:
+def preprocess_image_to_uint8(image_path: Path | str, mask: np.ndarray | None = None, target_size: int = TARGET_SIZE,) -> np.ndarray:
     """Load, resize, apply corner mask, return uint8 HWC array."""
     img = Image.open(image_path).convert("RGB")
     img = img.resize((target_size, target_size), Image.LANCZOS) # high-quality downsampling
@@ -25,12 +21,7 @@ def preprocess_image_to_uint8(
     return apply_mask(arr, mask)
 
 
-def write_npz_shard(
-    rows: list[dict],
-    out_path: Path,
-    mask: np.ndarray | None = None,
-    target_size: int = TARGET_SIZE,
-) -> None:
+def write_npz_shard(rows: list[dict], out_path: Path, mask: np.ndarray | None = None, target_size: int = TARGET_SIZE) -> None:
     """Load images for this batch, preprocess, write uncompressed NPZ."""
     if mask is None:
         mask = make_corner_polygon_mask(target_size)
@@ -52,7 +43,7 @@ def write_npz_shard(
     out_path.parent.mkdir(parents=True, exist_ok=True)
     np.savez(
         str(out_path),
-        images=np.stack(images),        # (N, H, W, 3) uint8
+        images=np.stack(images),
         labels=np.array(labels, dtype=np.int8),
         subclasses=np.array(subclasses, dtype="<U64"),
         rel_paths=np.array(rel_paths, dtype="<U512"),
